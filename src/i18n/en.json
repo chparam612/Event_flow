@@ -1,0 +1,68 @@
+{
+  "app": {
+    "title": "EventFlow",
+    "tagline": "Narendra Modi Stadium Guide"
+  },
+  "welcome": {
+    "headline": "Welcome to the Match!",
+    "subtext": "Navigate the world's largest cricket stadium smoothly.",
+    "cta": "Get Started"
+  },
+  "language": {
+    "choose": "Choose your language"
+  },
+  "intake": {
+    "q1": "Where are your seats?",
+    "q2": "How did you arrive today?",
+    "q3": "Who are you with?",
+    "q4": "Are you planning to leave early?",
+    "q5": "Any special assistance needed?",
+    "options": {
+      "q1_opt": ["North Stand", "South Stand", "East Stand", "West Stand"],
+      "q2_opt": ["Car/Parking", "Metro", "Auto/Cab", "Walking"],
+      "q3_opt": ["Just me", "Small Group (2-6)", "Large Group (7+)"],
+      "q4_opt": ["Yes, slightly early", "No, staying till the end", "Staying for presentation"],
+      "q5_opt": ["None", "Wheelchair access", "Medical requirement"]
+    }
+  },
+  "plan": {
+    "title": "Your Game Day Plan",
+    "gate": "Enter through Gate",
+    "walk": "Estimated walk time",
+    "crowd": "Current crowd at your gate"
+  },
+  "escort": {
+    "step": "Step",
+    "next": "Next Step",
+    "path_clear": "Path ahead looks clear."
+  },
+  "during": {
+    "live_status": "Live Stadium Flow",
+    "nudge_title": "Concession Update",
+    "nudge_cta": "Grab a snack now, lines are short!"
+  },
+  "exit": {
+    "title": "Ready to leave?",
+    "option_a": "Leave immediately",
+    "option_b": "Wait out the rush (15 mins)",
+    "option_c": "Stay for the ceremony",
+    "ai_suggestion": "We recommend waiting 15 minutes. The Metro line is heavily crowded right now."
+  },
+  "feedback": {
+    "q1": "How was your entry experience?",
+    "q2": "Did you easily find your seat?",
+    "q3": "Any suggestions to improve?",
+    "submit": "Submit Feedback",
+    "thankyou": "Thanks for your feedback! Have a safe journey home."
+  },
+  "staff": {
+    "zone_clear": "Zone is clear",
+    "zone_crowded": "High Density Alert! Zone crowded",
+    "quick_report": "Log Issue"
+  },
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading your personalized plan..."
+  }
+}
