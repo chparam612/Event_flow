@@ -2,6 +2,13 @@
 
 ![EventFlow Architecture](public/icon.svg)
 
+## Platform Screenshots
+
+| Attendee App (PWA) | Staff App (Steward) | Control Room (Command Center) |
+|:---:|:---:|:---:|
+| <img src="public/screenshots/attendee.png" height="350"> | <img src="public/screenshots/staff.png" height="350"> | <img src="public/screenshots/controlroom.png" height="350"> |
+
+
 ## Problem Statement
 Managing a crowd of 132,000 people at a venue like the Narendra Modi Stadium (NMS) presents overwhelming logistical challenges. Massive sudden surges during entry, exit, or intermission lead to dangerous bottlenecks, anxiety-inducing wait times, and extreme strain on ground staff. Traditional PA announcements and static signages fail because they lag behind real-time shifts in density and often incite panic by directing massive uncoordinated swarms toward singular "optimal" choke-points. The fundamental physical event experience is heavily degraded by unpredictable crowding.
 
