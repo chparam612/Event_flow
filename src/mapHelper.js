@@ -1,11 +1,10 @@
 /**
  * mapHelper.js
- * Centralized Google Maps logic with Density markers and Fallback handling.
+ * Centralized Google Maps logic with Density markers and High-Fidelity SVG Fallback.
  */
 
 const NMS_CENTER = { lat: 23.0919, lng: 72.5975 }; // Narendra Modi Stadium
 
-// Marker icons/colors based on density
 const DENSITY_COLORS = {
     GREEN:  '#00C49A',
     YELLOW: '#ffd166',
@@ -18,67 +17,138 @@ const getDensityColor = (score) => {
     return               DENSITY_COLORS.GREEN;
 };
 
-// Global fallback handler for InvalidKeyMapError
-window.gm_authFailure = () => {
-    console.warn("Google Maps Auth Failure (API Key invalid). Switching to SVG Mock Map.");
-    const containers = document.querySelectorAll('[id$="-map-container"]');
-    containers.forEach(container => {
-        container.innerHTML = `
-            <div class="map-fallback-overlay" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#121212; border:1px solid #333; color:#888; text-align:center; padding:20px;">
-                <div style="font-size:3rem; margin-bottom:15px;">🗺️</div>
-                <h3 style="color:#fff; margin-bottom:10px;">Safe-Navigation Mode</h3>
-                <p style="font-size:0.85rem;">Interactive Google Map is unavailable (API validation).<br/>Switched to simplified venue schematic.</p>
-                <div style="margin-top:20px; width:120px; height:80px; border:2px dashed #444; border-radius:40px; position:relative;">
-                    <div class="user-pulse" style="position:absolute; top:40%; left:45%; width:10px; height:10px; background:var(--primary-color); border-radius:50%;"></div>
-                </div>
-            </div>`;
-    });
-};
-
 /**
- * Initialize a Google Map in target element.
+ * MockMap Class 
+ * Mimics a Google Map object to provide a unified API when Google Maps fails.
  */
-export function initVenueMap(elementId, options = {}) {
-    const el = document.getElementById(elementId);
-    if (!el) return null;
+class MockMap {
+    constructor(containerId, densities = {}) {
+        this.containerId = containerId;
+        this.isMock = true;
+        this.render(densities);
+    }
 
-    try {
-        if (typeof google === 'undefined' || !google.maps) {
-            console.warn(`Google Maps API not loaded for ${elementId}`);
-            return null;
-        }
+    render(densities) {
+        const container = document.getElementById(this.containerId);
+        if (!container) return;
 
-        const map = new google.maps.Map(el, {
-            center: NMS_CENTER,
-            zoom: options.zoom || 16,
-            disableDefaultUI: true,
-            styles: [
-                { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
-                { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
-                { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
-                { "feature": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{ "color": "#d59563" }] },
-                { "feature": "road", "elementType": "geometry", "stylers": [{ "color": "#38414e" }] },
-                { "feature": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
-            ],
-            ...options
+        const zones = [
+            { id: 'N',  name: 'North Stand', x: 50,  y: 20, d: densities.NORTH_STAND || 0.3 },
+            { id: 'S',  name: 'South Stand', x: 50,  y: 80, d: densities.SOUTH_STAND || 0.3 },
+            { id: 'E',  name: 'East Stand',  x: 80,  y: 50, d: densities.EAST_STAND || 0.3 },
+            { id: 'W',  name: 'West Stand',  x: 20,  y: 50, d: densities.WEST_STAND || 0.3 },
+            { id: 'GB', name: 'Gate B',      x: 35,  y: 35, d: densities.GATE_AREA || 0.4 },
+            { id: 'P2', name: 'Parking P2',  x: 50,  y: 92, d: densities.PARKING_ZONE || 0.2 },
+        ];
+
+        container.innerHTML = `
+            <div class="svg-map-wrapper" style="width:100%; height:100%; background:#1a1a1a; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; border-radius:12px;">
+                <div style="position:absolute; top:12px; left:12px; font-size:0.7rem; color:#555; font-weight:700; text-transform:uppercase; letter-spacing:1px; z-index:10;">
+                    <span class="dot pulse" style="background:#ffd166; width:6px; height:6px;"></span> Safe-Navigation Mode
+                </div>
+                
+                <svg viewBox="0 0 100 100" style="width:90%; height:90%; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
+                    <!-- Stadium Outer Boundary -->
+                    <ellipse cx="50" cy="50" rx="45" ry="38" fill="none" stroke="#333" stroke-width="0.5" stroke-dasharray="2,2" />
+                    <ellipse cx="50" cy="50" rx="40" ry="32" fill="#222" stroke="#444" stroke-width="1" />
+                    
+                    <!-- Pitch -->
+                    <ellipse cx="50" cy="50" rx="15" ry="10" fill="#2a4a2a" stroke="#ffffff22" stroke-width="0.5" />
+                    
+                    <!-- Markers -->
+                    ${zones.map(z => {
+                        const color = getDensityColor(z.d);
+                        return `
+                        <g class="svg-marker" data-name="${z.name}" data-density="${Math.round(z.d * 100)}%">
+                            <circle cx="${z.x}" cy="${z.y}" r="4" fill="${color}33" class="marker-pulse" />
+                            <circle cx="${z.x}" cy="${z.y}" r="2" fill="${color}" stroke="#fff" stroke-width="0.5" />
+                            <text x="${z.x}" y="${z.y + 6}" text-anchor="middle" font-size="3" fill="#888" font-family="Inter, sans-serif" font-weight="700">${z.id}</text>
+                        </g>
+                        `;
+                    }).join('')}
+                </svg>
+
+                <div id="${this.containerId}-tooltip" style="position:absolute; bottom:15px; background:rgba(0,0,0,0.85); color:#fff; padding:6px 12px; border-radius:30px; font-size:0.75rem; border:1px solid #333; pointer-events:none; transition: opacity 0.2s;">
+                    Tap any marker for info
+                </div>
+            </div>
+            
+            <style>
+                @keyframes markerPulse {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    100% { transform: scale(2.5); opacity: 0; }
+                }
+                .marker-pulse {
+                    transform-origin: center;
+                    animation: markerPulse 2s infinite;
+                }
+                .svg-marker { cursor: pointer; }
+                .svg-marker:hover circle[r="2"] { transform: scale(1.2); }
+            </style>
+        `;
+
+        // Add Interactivity
+        const svgMarkers = container.querySelectorAll('.svg-marker');
+        const tooltip = document.getElementById(`${this.containerId}-tooltip`);
+        svgMarkers.forEach(m => {
+            m.addEventListener('click', () => {
+                const name = m.getAttribute('data-name');
+                const dens = m.getAttribute('data-density');
+                if (tooltip) tooltip.innerText = `${name}: ${dens} Capacity`;
+            });
         });
+    }
 
-        return map;
-    } catch (e) {
-        console.error("Map Init Error", e);
-        return null;
+    sync(densities) {
+        this.render(densities);
     }
 }
 
+// Global fallback handler (though we now use MockMap auto-init)
+window.gm_authFailure = () => {
+    console.warn("Google Maps Auth Failure.");
+};
+
 /**
- * Sync zone, gate, and parking markers to map.
+ * Initialize a Map in target element. Returns Google Map or MockMap.
+ */
+export function initVenueMap(elementId, options = {}) {
+    if (typeof google !== 'undefined' && google.maps) {
+        try {
+            const el = document.getElementById(elementId);
+            const map = new google.maps.Map(el, {
+                center: NMS_CENTER,
+                zoom: options.zoom || 16,
+                disableDefaultUI: true,
+                styles: [
+                    { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
+                    { "feature": "road", "elementType": "geometry", "stylers": [{ "color": "#38414e" }] },
+                    { "feature": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
+                ],
+                ...options
+            });
+            return map;
+        } catch (e) {
+            console.error("GMap init failed", e);
+        }
+    }
+    
+    // Fallback to MockMap
+    return new MockMap(elementId);
+}
+
+/**
+ * Sync markers for either GMap or MockMap.
  */
 export function syncMarkers(map, densities) {
     if (!map) return;
     
-    // This is a simplified marker sync. 
-    // In production, we would keep track of marker instances in a WeakMap to update rather than recreate.
-    
+    if (map.isMock) {
+        map.sync(densities);
+        return;
+    }
+
+    // Google Maps Marker Sync
     const zones = [
         { name: 'North Stand', pos: { lat: 23.0935, lng: 72.5975 }, density: densities.NORTH_STAND || 0.3 },
         { name: 'South Stand', pos: { lat: 23.0903, lng: 72.5975 }, density: densities.SOUTH_STAND || 0.3 },
@@ -103,11 +173,7 @@ export function syncMarkers(map, densities) {
                 scale: 10
             }
         });
-
-        const info = new google.maps.InfoWindow({
-            content: `<div style="color:#000; font-weight:700;">${z.name}: ${Math.round(z.density*100)}%</div>`
-        });
-
+        const info = new google.maps.InfoWindow({ content: `<div style="color:#000;">${z.name}: ${Math.round(z.density*100)}%</div>` });
         marker.addListener('click', () => info.open(map, marker));
     });
 }
