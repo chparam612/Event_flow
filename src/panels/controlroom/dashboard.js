@@ -1,10 +1,14 @@
 /**
  * Control Room — Command Center Dashboard
  * Desktop-first, 3-column layout for NMS Ahmedabad
- * Consumes simulation data + staff LocalSync updates
+ * Consumes simulation + Firebase Realtime Database
  */
 import { getZoneDensity, simulateTick, ZONES } from '/src/simulation.js';
-import { onSync, pushSync } from '/src/firebase.js';
+import {
+    listenStaff, listenZones, listenInstructions,
+    pushInstruction, pushNudge, writeZone,
+    pushData
+} from '/src/firebase.js';
 
 /* ─── Constants ──────────────────────────────────────────────── */
 const STAFF_ROSTER = [
@@ -225,8 +229,9 @@ export function initControl() {
     refreshAlerts(densities);
     refreshMetrics(densities);
 
-    // ── LocalSync Listeners ────────────────────────────────────
-    onSync('staff_status', (data) => {
+    // ── Firebase Realtime Listeners ────────────────────────────
+    // /staff — live staff status from ground stewards
+    listenStaff((data) => {
         if (!data) return;
         staffStatuses = data;
         const d = getZoneDensity();
@@ -235,9 +240,23 @@ export function initControl() {
         refreshAlerts(d);
     });
 
-    onSync('reports', (data) => {
+    // /zones — zone density data (also written by this panel's sim tick)
+    listenZones((data) => {
         if (!data) return;
-        // Could surface reports in alerts panel here
+        // Merge Firebase zone data into local view
+        const d = getZoneDensity();
+        Object.keys(data).forEach(zKey => {
+            const zoneName = zKey.replace(/_/g, ' ');
+            if (data[zKey].density !== undefined && d[zoneName] !== undefined) {
+                d[zoneName] = data[zKey].density / 100;
+            }
+        });
+    });
+
+    // /instructions — monitor acknowledgments in real-time
+    listenInstructions((data) => {
+        if (!data) return;
+        // Could show ack counts in dispatch panel
     });
 
     // ── Map Zone Click Binding ─────────────────────────────────
@@ -251,22 +270,31 @@ export function initControl() {
         }
     });
 
+    // ── Simulation Tick Helper (writes zones to Firebase) ──────
+    const runTick = () => {
+        const t = simulateTick();
+        const timeEl = document.getElementById('cr-sim-time');
+        if (timeEl) timeEl.textContent = t;
+        const d = getZoneDensity();
+        refreshMap(d);
+        refreshStaffList(d);
+        refreshAlerts(d);
+        refreshMetrics(d);
+        if (selectedZone) refreshDispatch(d);
+        updateScrubber(t);
+        // Write zone densities to Firebase /zones/{zoneId}
+        Object.keys(d).forEach(zoneName => {
+            const score = d[zoneName];
+            const status = score > 0.80 ? 'critical' : score > 0.60 ? 'busy' : 'clear';
+            writeZone(zoneName.replace(/\s/g, '_'), Math.round(score * 100), status);
+        });
+    };
+
     // ── Simulation Controls ────────────────────────────────────
     document.getElementById('sim-play')?.addEventListener('click', () => {
         if (simRunning) return;
         simRunning = true;
-        simIntervalId = setInterval(() => {
-            const t = simulateTick();
-            document.getElementById('cr-sim-time').textContent = t;
-            const d = getZoneDensity();
-            refreshMap(d);
-            refreshStaffList(d);
-            refreshAlerts(d);
-            refreshMetrics(d);
-            if (selectedZone) refreshDispatch(d);
-            // Update scrubber position
-            updateScrubber(t);
-        }, 1000 / simSpeed);
+        simIntervalId = setInterval(runTick, 1000 / simSpeed);
     });
 
     document.getElementById('sim-pause')?.addEventListener('click', () => {
@@ -281,17 +309,7 @@ export function initControl() {
         if (btn) btn.textContent = simSpeed === 5 ? '⏩ Normal 1x' : '⏩ Fast 5x';
         if (simRunning) {
             clearInterval(simIntervalId);
-            simIntervalId = setInterval(() => {
-                const t = simulateTick();
-                document.getElementById('cr-sim-time').textContent = t;
-                const d = getZoneDensity();
-                refreshMap(d);
-                refreshStaffList(d);
-                refreshAlerts(d);
-                refreshMetrics(d);
-                if (selectedZone) refreshDispatch(d);
-                updateScrubber(t);
-            }, 1000 / simSpeed);
+            simIntervalId = setInterval(runTick, 1000 / simSpeed);
         }
     });
 }
@@ -393,7 +411,7 @@ function refreshDispatch(densities) {
     el.querySelectorAll('.cr-quick-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const text = btn.getAttribute('data-instr');
-            pushSync('instructions', { text: text, zone: selectedZone });
+            pushInstruction(selectedZone, text);
             btn.textContent = '✓ Sent';
             btn.disabled = true;
             btn.classList.add('sent');
@@ -404,7 +422,10 @@ function refreshDispatch(densities) {
     document.getElementById('send-staff-attendee')?.addEventListener('click', () => {
         const msg = document.getElementById('nudge-msg')?.value;
         if (!msg) return;
-        pushSync('instructions', { text: msg, zone: selectedZone, type: 'nudge' });
+        // Push instruction for staff
+        pushInstruction(selectedZone, msg);
+        // Push nudge for attendees
+        pushNudge(selectedZone, msg);
         nudgesSent++;
         document.getElementById('m-nudges').textContent = nudgesSent;
         const sendBtn = document.getElementById('send-staff-attendee');

@@ -1,0 +1,49 @@
+{
+  "rules": {
+    "zones": {
+      "$zoneId": {
+        ".read": true,
+        ".write": "auth != null && (root.child('roles/' + auth.uid).val() === 'control' || root.child('roles/' + auth.uid).val() === 'staff')"
+      }
+    },
+    "staff": {
+      "$staffId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (auth.uid === $staffId || root.child('roles/' + auth.uid).val() === 'control')"
+      }
+    },
+    "instructions": {
+      ".read": "auth != null",
+      "$instructionId": {
+        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'control'",
+        "acknowledgedBy": {
+          "$ackId": {
+            ".write": "auth != null"
+          }
+        }
+      }
+    },
+    "nudges": {
+      ".read": true,
+      "$nudgeId": {
+        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'control'"
+      }
+    },
+    "feedback": {
+      ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'control'",
+      "$timestamp": {
+        ".write": true
+      }
+    },
+    "attendees": {
+      "$sessionId": {
+        ".read": "auth == null || auth.uid === $sessionId || root.child('roles/' + auth.uid).val() === 'control'",
+        ".write": "auth == null || auth.uid === $sessionId"
+      }
+    },
+    "roles": {
+      ".read": "auth != null",
+      ".write": false
+    }
+  }
+}

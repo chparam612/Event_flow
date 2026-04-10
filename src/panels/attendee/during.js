@@ -1,6 +1,18 @@
 import { getZoneDensity, simulateTick, ZONES } from '/src/simulation.js';
 import { initVenueMap, syncMarkers } from '/src/mapHelper.js';
-import { onSync } from '/src/firebase.js';
+import { listenStaff, listenZones, listenNudges } from '/src/firebase.js';
+
+function staffZoneToSim(zoneId) {
+    if (!zoneId) return null;
+    const z = zoneId.toLowerCase();
+    if (z.includes('north')) return 'North Stand';
+    if (z.includes('south')) return 'South Stand';
+    if (z.includes('east')) return 'East Stand';
+    if (z.includes('west')) return 'West Stand';
+    if (z.includes('gate')) return 'Gate Area';
+    if (z.includes('parking')) return 'Parking Zone';
+    return null;
+}
 
 // Match timeline constants (same as simulation.js)
 const INNINGS_BREAK_START = 1320;  // 22:00 (10:00 PM)
@@ -260,23 +272,28 @@ export function initDuring() {
         checkNudges(densities, simMinutes);
     };
 
-    // Real-time Staff Status Sync
-    const STAFF_ZONE_MAP = {
-        'N1_North': 'North Stand', 'N2_North': 'North Stand', 'N3_North': 'North Stand', 'N4_North': 'North Stand',
-        'S1_South': 'South Stand', 'S2_South': 'South Stand',
-        'E1_East': 'East Stand', 'E2_East': 'East Stand',
-        'W1_West': 'West Stand', 'W2_West': 'West Stand',
-        'Gate_A': 'Gate Area', 'Gate_B': 'Gate Area', 'Gate_C': 'Gate Area', 'Gate_D': 'Gate Area',
-        'Gate_E': 'Gate Area', 'Gate_F': 'Gate Area', 'Gate_G': 'Gate Area', 'Gate_H': 'Gate Area', 'Gate_I': 'Gate Area',
-        'Parking_P1': 'Parking Zone', 'Parking_P2': 'Parking Zone', 'Parking_P3': 'Parking Zone', 'Parking_P4': 'Parking Zone',
-    };
-    onSync('staff_status', (data) => {
+    // ── Firebase Realtime Listeners ─────────────────────────────
+    listenStaff((data) => {
         if (!data) return;
         const densities = getZoneDensity();
-        Object.keys(data).forEach(zoneKey => {
-            const simZone = STAFF_ZONE_MAP[zoneKey];
-            if (simZone && data[zoneKey].status === 'CROWDED') {
-                densities[simZone] = 1.0;
+        Object.keys(data).forEach(staffId => {
+            const entry = data[staffId];
+            if (entry.status === 'crowded' && entry.zoneId) {
+                const zoneName = staffZoneToSim(entry.zoneId);
+                if (zoneName) densities[zoneName] = 1.0;
+            }
+        });
+        updateStatusStrip(densities);
+        syncMarkers(map, densities);
+    });
+
+    listenZones((data) => {
+        if (!data) return;
+        const densities = getZoneDensity();
+        Object.keys(data).forEach(zKey => {
+            const zoneName = zKey.replace(/_/g, ' ');
+            if (data[zKey].density !== undefined && densities[zoneName] !== undefined) {
+                densities[zoneName] = data[zKey].density / 100;
             }
         });
         updateStatusStrip(densities);

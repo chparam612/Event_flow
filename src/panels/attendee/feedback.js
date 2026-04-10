@@ -1,4 +1,4 @@
-import { syncFeedback } from '/src/firebase.js';
+import { writeFeedback } from '/src/firebase.js';
 
 const DIFFICULTY_CHIPS = [
     { id: 'entry',    label: 'Entry' },
@@ -220,7 +220,7 @@ export function initFeedback() {
             localStorage.setItem('eventflow_feedback', JSON.stringify(all));
 
             // Use the timestamp as the key as requested
-            syncFeedback(payload, timestamp);
+            writeFeedback(timestamp, payload);
         } catch (e) {
             console.error('Feedback save error', e);
         }
