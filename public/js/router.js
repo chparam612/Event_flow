@@ -9,6 +9,7 @@ import { renderFeedback, initFeedback } from '/src/panels/attendee/feedback.js';
 import { renderStaff, initStaff }       from '/src/panels/staff/dashboard.js';
 import { renderControl, initControl }   from '/src/panels/controlroom/dashboard.js';
 import { renderHelp, initHelp }         from '/src/panels/attendee/help.js';
+import { renderHow, initHow }           from '/src/panels/attendee/how.js';
 
 const appDiv = document.getElementById('app');
 
@@ -23,7 +24,8 @@ const routes = {
     '/feedback': 'feedback',
     '/staff': 'staff',
     '/control': 'control',
-    '/help': 'help'
+    '/help': 'help',
+    '/how-it-works': 'how'
 };
 
 const renderPanel = (panelName) => {
@@ -55,6 +57,10 @@ const renderPanel = (panelName) => {
         case 'exit':
             appDiv.innerHTML = renderExit();
             initExit();
+            break;
+        case 'how':
+            appDiv.innerHTML = renderHow();
+            initHow();
             break;
         case 'staff':
             appDiv.innerHTML = renderStaff();

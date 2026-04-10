@@ -11,13 +11,22 @@ export function renderWelcome() {
             
             <header class="attendee-top-bar">
                 <div class="attendee-logo">EventFlow</div>
-                <button class="icon-btn" id="lang-switch-btn" aria-label="Switch Language">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="icon-btn" id="lang-switch-btn" aria-label="Switch Language">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" id="how-it-works-btn" aria-label="How it works">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
+                </div>
             </header>
 
             <main class="welcome-content">
@@ -43,6 +52,14 @@ export function initWelcome() {
     if (startBtn) {
         startBtn.addEventListener('click', () => {
             window.history.pushState(null, null, '/intake');
+            window.dispatchEvent(new Event('popstate'));
+        });
+    }
+
+    const howBtn = document.getElementById('how-it-works-btn');
+    if (howBtn) {
+        howBtn.addEventListener('click', () => {
+            window.history.pushState(null, null, '/how-it-works');
             window.dispatchEvent(new Event('popstate'));
         });
     }
