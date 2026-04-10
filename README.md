@@ -50,9 +50,9 @@ EventFlow operates concurrently across a highly-resilient, three-panel topology:
 ## Demo Instructions
 *(Ensure your testing environment permits multiple browser windows)*
 
-1. **Attendee**: Open exactly one mobile-sized viewport to `[YOUR_HOSTING_URL]/` (or `localhost:3000/`)
-2. **Staff**: Open a mobile-sized viewport to `[YOUR_HOSTING_URL]/staff`
-3. **Control Room**: Open a large desktop maximized window to `[YOUR_HOSTING_URL]/control`
+1. **Attendee**: Open exactly one mobile-sized viewport to `https://studio-5460981965-b6a76.web.app/` (or `localhost:3000/`)
+2. **Staff**: Open a mobile-sized viewport to `https://studio-5460981965-b6a76.web.app/staff`
+3. **Control Room**: Open a large desktop maximized window to `https://studio-5460981965-b6a76.web.app/control`
 4. **Demo Flow (5-Minute Path)**:
    * **(Control)**: Scrub the simulation timeline forward to trigger a "Crowded" red alert in Zone N3.
    * **(Staff)**: Login as Staff ID: \`123\`, Zone: \`N3 North\`. Notice the density overlay turns red.
