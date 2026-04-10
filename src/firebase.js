@@ -19,13 +19,13 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth
 
 /* ─── Config ─────────────────────────────────────────────────── */
 const firebaseConfig = {
-    apiKey: "AIzaSy-MOCK-API-KEY-123456789",
-    authDomain: "eventflow-nms.firebaseapp.com",
-    databaseURL: "https://eventflow-nms-default-rtdb.firebaseio.com",
-    projectId: "eventflow-nms",
-    storageBucket: "eventflow-nms.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef1234567890"
+    apiKey: "AIzaSyCejyXcM3h0oWsGr4ryK9guOvh00olpoAE",
+    authDomain: "studio-5460981965-b6a76.firebaseapp.com",
+    databaseURL: "https://studio-5460981965-b6a76-default-rtdb.firebaseio.com",
+    projectId: "studio-5460981965-b6a76",
+    storageBucket: "studio-5460981965-b6a76.firebasestorage.app",
+    messagingSenderId: "7972503062",
+    appId: "1:7972503062:web:43758a61785f1350e5bf37"
 };
 
 let app, db, auth;
