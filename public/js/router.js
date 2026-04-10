@@ -7,7 +7,7 @@ import { renderDuring, initDuring }     from '/src/panels/attendee/during.js';
 import { renderExit, initExit }         from '/src/panels/attendee/exit.js';
 import { renderFeedback, initFeedback } from '/src/panels/attendee/feedback.js';
 import { renderStaff, initStaff }       from '/src/panels/staff/dashboard.js';
-import { renderControl, initControl }   from '/src/panels/control/dashboard.js';
+import { renderControl, initControl }   from '/src/panels/controlroom/dashboard.js';
 import { renderHelp, initHelp }         from '/src/panels/attendee/help.js';
 
 const appDiv = document.getElementById('app');
