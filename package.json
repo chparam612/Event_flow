@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev":    "node server.js",
-    "start":  "firebase serve",
-    "deploy": "firebase deploy"
+    "build":  "node build.js",
+    "deploy": "npm run build && npx firebase-tools deploy"
   },
   "dependencies": {
     "firebase": "^10.8.0"
