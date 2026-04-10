@@ -9,6 +9,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth
 const firebaseConfig = {
   apiKey: "AIzaSy-MOCK-API-KEY-123456789",
   authDomain: "eventflow-nms.firebaseapp.com",
+  // Use a safer default or handle the misconfigured URL provided by the environment
   databaseURL: "https://eventflow-nms-default-rtdb.firebaseio.com",
   projectId: "eventflow-nms",
   storageBucket: "eventflow-nms.appspot.com",
@@ -20,29 +21,46 @@ let app, db, auth;
 
 try {
   app = initializeApp(firebaseConfig);
-  db = getDatabase(app);
+  // Only attempt to get DB if the URL looks valid (not the placeholder)
+  if (firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('default-rtdb')) {
+      db = getDatabase(app);
+  }
   auth = getAuth(app);
 } catch (error) {
   console.warn("Firebase: Initialization failed. LocalSync active.");
 }
 
 // ── Ultra-Resilient Sync (Shared between Tabs) ────────────────
-const syncEmitters = {};
-
 export function onSync(node, callback) {
     // 1. Listen to Firebase if available
-    if (db) onValue(ref(db, node), (snap) => callback(snap.val()));
+    if (db) {
+        try {
+            onValue(ref(db, node), (snap) => callback(snap.val()));
+        } catch (e) {
+            console.warn(`Firebase listen failed for ${node}:`, e.message);
+        }
+    }
 
     // 2. Listen to LocalStorage for cross-tab sync
     window.addEventListener('storage', (e) => {
         if (e.key === `ef_sync_${node}`) {
-            callback(JSON.parse(e.newValue));
+            try {
+                callback(JSON.parse(e.newValue));
+            } catch (err) {
+                console.error("LocalSync Parse Error", err);
+            }
         }
     });
 
     // 3. Initial load from LocalStorage
     const local = localStorage.getItem(`ef_sync_${node}`);
-    if (local) callback(JSON.parse(local));
+    if (local) {
+        try {
+            callback(JSON.parse(local));
+        } catch (err) {
+            console.error("LocalSync Initial Parse Error", err);
+        }
+    }
 }
 
 export function pushSync(node, data) {
@@ -58,14 +76,15 @@ export function pushSync(node, data) {
     } else if (node === 'reports') {
         const existing = JSON.parse(localStorage.getItem(key) || '[]');
         existing.push(timestamped);
-        newValue = existing.slice(-20); // Keep last 20 reports
+        newValue = existing.slice(-20);
     } else {
         newValue = timestamped;
     }
 
+    // Update LocalStorage
     localStorage.setItem(key, JSON.stringify(newValue));
     
-    // Trigger locally for cross-tab sync
+    // Trigger locally for cross-tab sync (StorageEvent only naturally fires in OTHER tabs)
     window.dispatchEvent(new StorageEvent('storage', {
         key: key,
         newValue: JSON.stringify(newValue),
@@ -74,16 +93,20 @@ export function pushSync(node, data) {
 
     // Sync to Firebase if available
     if (db) {
-        if (node === 'staff_status') {
-            const zKey = data.zone ? data.zone.replace(/\s/g, '_') : 'unknown';
-            set(ref(db, `${node}/${zKey}`), timestamped).catch(() => {});
-        } else {
-            push(ref(db, node), timestamped).catch(() => {});
+        try {
+            if (node === 'staff_status') {
+                const zKey = data.zone ? data.zone.replace(/\s/g, '_') : 'unknown';
+                set(ref(db, `${node}/${zKey}`), timestamped);
+            } else {
+                push(ref(db, node), timestamped);
+            }
+        } catch (e) {
+            console.warn(`Firebase push failed for ${node}:`, e.message);
         }
     }
 }
 
-// Legacy Helpers (Mapping to new sync system)
+// Legacy Helpers
 export function syncSimulation(state) { pushSync('simulation', state); }
 export function syncFeedback(payload) { pushSync('feedback', payload); }
 export function syncIntake(payload) { pushSync('intake', payload); }
