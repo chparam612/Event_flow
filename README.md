@@ -1,5 +1,8 @@
 # EventFlow — Smart Crowd Management for NMS
 
+[![Watch the Demo Video](https://img.shields.io/badge/Watch_Demo-Video-red?style=for-the-badge&logo=youtube)](https://youtube.com/your-demo-link-here)
+
+
 ![EventFlow Architecture](public/icon.svg)
 
 ## Platform Screenshots
