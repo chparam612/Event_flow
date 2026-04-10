@@ -127,3 +127,26 @@ h1.title::after {
         font-size: 2.5rem;
     }
 }
+
+/* ─── Loading States & Skeletons ───────────────────────────── */
+.loading-spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(0, 196, 154, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.skeleton-block {
+    background: linear-gradient(90deg, #1a1a24 25%, #252535 50%, #1a1a24 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    border-radius: var(--br-md);
+}
+@keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

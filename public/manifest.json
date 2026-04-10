@@ -1,0 +1,17 @@
+{
+  "name": "EventFlow",
+  "short_name": "EventFlow",
+  "description": "Narendra Modi Stadium Crowd Management Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0F1E",
+  "theme_color": "#00C49A",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

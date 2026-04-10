@@ -1088,3 +1088,13 @@
     80%  { opacity: 0.8; }
     100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; }
 }
+
+/* ── iPhone SE (375px) Overrides ── */
+@media (max-width: 375px) {
+    .staggered-card { padding: var(--spacing-sm) !important; margin-bottom: 8px !important; }
+    .plan-greeting h1 { font-size: 1.5rem !important; }
+    .card-header h2 { font-size: 1.1rem !important; }
+    .stat-row { flex-direction: column; gap: 4px; }
+    .primary-btn { height: 50px; font-size: 0.95rem; }
+    .nav-bar { padding-bottom: 15px; }
+}

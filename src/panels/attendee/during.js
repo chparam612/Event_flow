@@ -147,7 +147,7 @@ export function renderDuring() {
 
             <!-- Venue Map Card -->
             <div class="venue-map-card" style="padding: 0; overflow: hidden; height: 320px; position: relative; border-radius: 20px;">
-                <div id="during-map-container" style="width: 100%; height: 100%;"></div>
+                <div id="during-map-container" style="width: 100%; height: 100%;" class="skeleton-block"></div>
                 <div class="map-overlay-title" style="position: absolute; top: 12px; right: 12px; background: rgba(10,10,16,0.8); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; color: #fff; z-index: 10; display: flex; align-items: center; gap: 6px;">
                     <span class="dot pulse"></span> Venue Heatmap
                 </div>

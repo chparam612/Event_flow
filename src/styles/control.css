@@ -569,3 +569,11 @@
     .right-panel { display: none; }
     .cr-bottom-bar { flex-wrap: wrap; }
 }
+@media (max-width: 375px) {
+    .cr-header { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
+    .cr-logo { font-size: 1rem; }
+    .cr-sim-controls { width: 100%; justify-content: space-between; }
+    .cr-scrubber { width: 100px; }
+    .cr-map-container { min-height: 250px; }
+    .cr-stadium-svg { transform: scale(0.85); transform-origin: center top; }
+}

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EventFlow | Narendra Modi Stadium</title>
     
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00C49A">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,10 +32,6 @@
         console.log("EventFlow: HTML Parsed. Booting...");
         window.addEventListener('error', (e) => console.error("Global Error:", e.message, "at", e.filename));
     </script>
-
-    <!-- i18n Helper -->
-    <script type="module" src="/src/i18nHelper.js"></script>
-
 </head>
 <body>
     <div id="translator-container">
@@ -44,6 +43,19 @@
 
     <!-- Scripts -->
     <script type="module" src="/js/router.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+        });
+      }
+    </script>
 
     <!-- Deferred Google Translate -->
     <script type="text/javascript">

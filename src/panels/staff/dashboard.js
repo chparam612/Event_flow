@@ -166,14 +166,23 @@ export function initStaff() {
 
     // ── Event Bindings ────────────────────────────────────────
     // Login
-    app.querySelector('#login-btn')?.addEventListener('click', () => {
+    app.querySelector('#login-btn')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        const originalText = btn.textContent;
         const zone = app.querySelector('#login-zone')?.value;
         const id = app.querySelector('#login-id')?.value;
         if (!id) return alert('Please enter Staff ID');
-        saveSession({ zone, staffId: id, status: 'clear' });
-        // Write to Firebase: /staff/{staffId}
-        writeStaff(id, { zoneId: zone, status: 'clear', online: true });
-        refreshUI();
+        
+        // Show spinner
+        btn.innerHTML = '<span class="loading-spinner" style="width:20px;height:20px;border-width:2px;margin-right:8px;"></span> Logging in...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            saveSession({ zone, staffId: id, status: 'clear' });
+            // Write to Firebase: /staff/{staffId}
+            writeStaff(id, { zoneId: zone, status: 'clear', online: true });
+            refreshUI();
+        }, 600); // simulate network delay for UX
     });
 
     // Logout

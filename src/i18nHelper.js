@@ -40,6 +40,9 @@ export async function applyTranslations() {
 
     // Update the html language attribute
     document.documentElement.lang = lang;
+
+    // Dispatch global event for instant re-render
+    window.dispatchEvent(new CustomEvent('eventflow:languageChanged', { detail: lang }));
 }
 
 // Attach globally so independent vanilla JS files can trigger it

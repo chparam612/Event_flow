@@ -45,7 +45,7 @@ export function renderPlan() {
 
                 <!-- Card 2: Live Venue Map -->
                 <div class="plan-card transparent-card staggered-card" style="animation-delay: 0.3s; padding: 0; overflow: hidden; height: 320px;">
-                    <div id="plan-map-container" style="width: 100%; height: 100%;"></div>
+                    <div id="plan-map-container" style="width: 100%; height: 100%;" class="skeleton-block"></div>
                     <div class="map-overlay-title">
                         <span class="dot pulse"></span> <span data-i18n="during.live_status">Live Venue Map</span>
                     </div>

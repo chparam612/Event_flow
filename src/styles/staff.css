@@ -232,3 +232,14 @@
 .history-time { font-size: 0.75rem; color: var(--staff-secondary); margin-bottom: 4px; }
 .history-text { font-size: 1rem; font-weight: 500; line-height: 1.4; }
 .history-status { font-size: 0.7rem; text-transform: uppercase; color: var(--staff-accent); margin-top: 8px; font-weight: 700; }
+
+/* ── iPhone SE (375px) Overrides ── */
+@media (max-width: 375px) {
+    .staff-main-content { padding: 12px; gap: 16px; min-height: 100vh; }
+    .big-toggle-grid { height: 180px; gap: 10px; }
+    .status-btn { padding: 12px; font-size: 0.8rem; }
+    .instruction-card { padding: 16px; margin: 0; }
+    .ack-btn { height: 48px; }
+    .emoji-report-grid { gap: 8px; }
+    .emoji-btn { padding: 12px 8px; font-size: 0.75rem; }
+}
