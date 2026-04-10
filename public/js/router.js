@@ -100,10 +100,6 @@ const router = () => {
 };
 
 window.addEventListener('popstate', router);
-window.addEventListener('eventflow:languageChanged', () => {
-    console.log('Language changed — instantly re-rendering current route');
-    router();
-});
 
 // Run router immediately as modules are deferred by default
 console.log('EventFlow Router Initializing...');
