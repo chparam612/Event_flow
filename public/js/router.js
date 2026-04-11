@@ -1,3 +1,4 @@
+import { renderLanding, initLanding }     from '/src/panels/landing/index.js';
 import { renderWelcome, initWelcome }   from '/src/panels/attendee/welcome.js';
 import { renderLanguage, initLanguage } from '/src/panels/attendee/language.js';
 import { renderIntake, initIntake }     from '/src/panels/attendee/intake.js';
@@ -14,7 +15,8 @@ import { renderHow, initHow }           from '/src/panels/attendee/how.js';
 const appDiv = document.getElementById('app');
 
 const routes = {
-    '/': 'attendee',
+    '/': 'landing',
+    '/attendee': 'attendee',
     '/language': 'language',
     '/intake': 'intake',
     '/plan': 'plan',
@@ -30,6 +32,10 @@ const routes = {
 
 const renderPanel = (panelName) => {
     switch(panelName) {
+        case 'landing':
+            appDiv.innerHTML = renderLanding();
+            initLanding();
+            break;
         case 'attendee':
             appDiv.innerHTML = renderWelcome();
             initWelcome();
@@ -85,7 +91,7 @@ const renderPanel = (panelName) => {
                     <div class="panel-content" style="text-align: center; padding: 40px;">
                         <h2 style="font-size: 3rem; color: var(--primary-color); margin-bottom: 10px;">Oops!</h2>
                         <p style="color: var(--text-secondary); margin-bottom: 25px;">The requested panel does not exist or has been moved.</p>
-                        <a href="/" data-link style="display: inline-block; padding: 10px 24px; background: var(--primary-color); color: #000; text-decoration: none; border-radius: var(--br-sm); font-weight: 600; transition: transform 0.2s);">Return Home</a>
+                        <a href="/" data-link style="display: inline-block; padding: 10px 24px; background: var(--primary-color); color: #000; text-decoration: none; border-radius: var(--br-sm); font-weight: 600;">Return Home</a>
                     </div>
                 </div>
             `;
@@ -101,7 +107,6 @@ const router = () => {
 
 window.addEventListener('popstate', router);
 
-// Run router immediately as modules are deferred by default
 console.log('EventFlow Router Initializing...');
 if (appDiv) {
     router();
@@ -109,7 +114,6 @@ if (appDiv) {
     console.error('Critical Error: #app container not found in DOM');
 }
 
-// Setup function to catch link clicks and use history API
 document.body.addEventListener('click', e => {
     const link = e.target.closest('[data-link]');
     if (link) {

@@ -1,4 +1,13 @@
 {
+  "landing": {
+    "tagline": "Narendra Modi Stadium — Smart Crowd Guide",
+    "attendee_title": "Match Attendee",
+    "attendee_sub": "Get your personal match plan",
+    "staff_title": "Ground Staff",
+    "staff_sub": "Zone reporting & instructions",
+    "control_title": "Control Room",
+    "control_sub": "Command center access"
+  },
   "app": {
     "title": "EventFlow",
     "tagline": "Narendra Modi Stadium Guide"
