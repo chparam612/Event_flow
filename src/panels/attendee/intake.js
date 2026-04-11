@@ -25,10 +25,10 @@ export function renderIntake() {
                     <div class="intake-slide" data-step="1">
                         <h2>Arrival time</h2>
                         <div class="options-grid">
-                            <button class="intake-opt" data-q="q1" data-val="Before 5 PM">Before 5 PM</button>
-                            <button class="intake-opt" data-q="q1" data-val="5-6 PM">5-6 PM</button>
-                            <button class="intake-opt" data-q="q1" data-val="6-7 PM">6-7 PM</button>
-                            <button class="intake-opt" data-q="q1" data-val="After 7 PM">After 7 PM</button>
+                            <button class="intake-opt" data-q="q1" data-val="Before 5 PM" aria-label="Action button">Before 5 PM</button>
+                            <button class="intake-opt" data-q="q1" data-val="5-6 PM" aria-label="Action button">5-6 PM</button>
+                            <button class="intake-opt" data-q="q1" data-val="6-7 PM" aria-label="Action button">6-7 PM</button>
+                            <button class="intake-opt" data-q="q1" data-val="After 7 PM" aria-label="Action button">After 7 PM</button>
                         </div>
                     </div>
 
@@ -36,10 +36,10 @@ export function renderIntake() {
                     <div class="intake-slide" data-step="2">
                         <h2>Group size</h2>
                         <div class="options-grid list-grid">
-                            <button class="intake-opt" data-q="q2" data-val="Just me">Just me</button>
-                            <button class="intake-opt" data-q="q2" data-val="2-3 people">2-3 people</button>
-                            <button class="intake-opt" data-q="q2" data-val="4-6 people">4-6 people</button>
-                            <button class="intake-opt" data-q="q2" data-val="7+ people">7+ people</button>
+                            <button class="intake-opt" data-q="q2" data-val="Just me" aria-label="Action button">Just me</button>
+                            <button class="intake-opt" data-q="q2" data-val="2-3 people" aria-label="Action button">2-3 people</button>
+                            <button class="intake-opt" data-q="q2" data-val="4-6 people" aria-label="Action button">4-6 people</button>
+                            <button class="intake-opt" data-q="q2" data-val="7+ people" aria-label="Action button">7+ people</button>
                         </div>
                     </div>
 
@@ -47,10 +47,10 @@ export function renderIntake() {
                     <div class="intake-slide" data-step="3">
                         <h2>How are you coming?</h2>
                         <div class="options-grid list-grid">
-                            <button class="intake-opt" data-q="q3" data-val="car">🚗 Car/Bike</button>
-                            <button class="intake-opt" data-q="q3" data-val="metro">🚌 Metro/Bus</button>
-                            <button class="intake-opt" data-q="q3" data-val="auto">🛺 Auto/Cab</button>
-                            <button class="intake-opt" data-q="q3" data-val="walking">🚶 Walking</button>
+                            <button class="intake-opt" data-q="q3" data-val="car" aria-label="Action button">🚗 Car/Bike</button>
+                            <button class="intake-opt" data-q="q3" data-val="metro" aria-label="Action button">🚌 Metro/Bus</button>
+                            <button class="intake-opt" data-q="q3" data-val="auto" aria-label="Action button">🛺 Auto/Cab</button>
+                            <button class="intake-opt" data-q="q3" data-val="walking" aria-label="Action button">🚶 Walking</button>
                         </div>
                     </div>
 
@@ -58,11 +58,11 @@ export function renderIntake() {
                     <div class="intake-slide" data-step="4">
                         <h2>Parking zone</h2>
                         <div class="options-grid list-grid">
-                            <button class="intake-opt" data-q="q4" data-val="P1 North">P1 North</button>
-                            <button class="intake-opt" data-q="q4" data-val="P2 South">P2 South</button>
-                            <button class="intake-opt" data-q="q4" data-val="P3 East">P3 East</button>
-                            <button class="intake-opt" data-q="q4" data-val="P4 West">P4 West</button>
-                            <button class="intake-opt" data-q="q4" data-val="Not parked yet">Not parked yet</button>
+                            <button class="intake-opt" data-q="q4" data-val="P1 North" aria-label="Action button">P1 North</button>
+                            <button class="intake-opt" data-q="q4" data-val="P2 South" aria-label="Action button">P2 South</button>
+                            <button class="intake-opt" data-q="q4" data-val="P3 East" aria-label="Action button">P3 East</button>
+                            <button class="intake-opt" data-q="q4" data-val="P4 West" aria-label="Action button">P4 West</button>
+                            <button class="intake-opt" data-q="q4" data-val="Not parked yet" aria-label="Action button">Not parked yet</button>
                         </div>
                     </div>
 
@@ -70,10 +70,10 @@ export function renderIntake() {
                     <div class="intake-slide" data-step="5">
                         <h2>Destination after</h2>
                         <div class="options-grid list-grid">
-                            <button class="intake-opt" data-q="q5" data-val="Home North">🏠 Home North</button>
-                            <button class="intake-opt" data-q="q5" data-val="Home South">🏠 Home South</button>
-                            <button class="intake-opt" data-q="q5" data-val="Railway Station">🚉 Railway Station</button>
-                            <button class="intake-opt" data-q="q5" data-val="Airport">✈️ Airport</button>
+                            <button class="intake-opt" data-q="q5" data-val="Home North" aria-label="Action button">🏠 Home North</button>
+                            <button class="intake-opt" data-q="q5" data-val="Home South" aria-label="Action button">🏠 Home South</button>
+                            <button class="intake-opt" data-q="q5" data-val="Railway Station" aria-label="Action button">🚉 Railway Station</button>
+                            <button class="intake-opt" data-q="q5" data-val="Airport" aria-label="Action button">✈️ Airport</button>
                         </div>
                     </div>
 
@@ -81,7 +81,7 @@ export function renderIntake() {
             </div>
 
             <div class="intake-footer">
-                <button class="primary-btn pulse-glow" id="intake-next-btn" disabled>Next</button>
+                <button class="primary-btn pulse-glow" id="intake-next-btn" disabled aria-label="intake next btn">Next</button>
             </div>
 
             <div id="loading-spinner" class="overlay hidden">

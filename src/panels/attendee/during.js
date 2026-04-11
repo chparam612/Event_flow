@@ -67,8 +67,8 @@ function buildInningsNudgeHTML() {
         </div>
         <p class="nudge-warn">Both will be busier in 10 min — go early!</p>
         <div class="nudge-actions">
-            <button class="action-btn" id="nudge-guide-btn" style="border-color: var(--primary-color); color: var(--primary-color);">Guide me there</button>
-            <button class="action-btn dismiss-nudge" style="border-color: var(--border-color);">I'll manage</button>
+            <button class="action-btn" id="nudge-guide-btn" style="border-color: var(--primary-color); color: var(--primary-color);" aria-label="nudge guide btn">Guide me there</button>
+            <button class="action-btn dismiss-nudge" style="border-color: var(--border-color);" aria-label="Action button">I'll manage</button>
         </div>
     </div>`;
 }
@@ -89,8 +89,8 @@ function buildExitNudgeHTML() {
             </div>
         </div>
         <div class="nudge-actions">
-            <button class="action-btn" id="nudge-exit-btn" style="border-color: var(--primary-color); color: var(--primary-color);">See full exit plan</button>
-            <button class="action-btn dismiss-nudge" style="border-color: var(--border-color);">Stay a bit longer</button>
+            <button class="action-btn" id="nudge-exit-btn" style="border-color: var(--primary-color); color: var(--primary-color);" aria-label="nudge exit btn">See full exit plan</button>
+            <button class="action-btn dismiss-nudge" style="border-color: var(--border-color);" aria-label="Action button">Stay a bit longer</button>
         </div>
     </div>`;
 }
@@ -111,7 +111,7 @@ function buildDensityNudgeHTML(zone) {
             </div>
         </div>
         <div class="nudge-actions">
-            <button class="action-btn dismiss-nudge" style="border-color: var(--border-color); width: 100%;">Got it, thanks</button>
+            <button class="action-btn dismiss-nudge" style="border-color: var(--border-color); width: 100%;" aria-label="Action button">Got it, thanks</button>
         </div>
     </div>`;
 }
@@ -155,16 +155,16 @@ export function renderDuring() {
 
             <!-- Quick action row -->
             <div class="quick-actions-row">
-                <button class="quick-action-btn" id="btn-food">
+                <button class="quick-action-btn" id="btn-food" aria-label="btn food">
                     <span>🍺</span><span>Food</span>
                 </button>
-                <button class="quick-action-btn" id="btn-restroom">
+                <button class="quick-action-btn" id="btn-restroom" aria-label="btn restroom">
                     <span>🚽</span><span>Restroom</span>
                 </button>
-                <button class="quick-action-btn" id="btn-exit-plan">
+                <button class="quick-action-btn" id="btn-exit-plan" aria-label="btn exit plan">
                     <span>🚪</span><span>Exit Plan</span>
                 </button>
-                <button class="quick-action-btn" id="btn-help">
+                <button class="quick-action-btn" id="btn-help" aria-label="btn help">
                     <span>🆘</span><span>Help</span>
                 </button>
             </div>

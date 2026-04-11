@@ -39,7 +39,7 @@ export function renderPlan() {
                     <div class="card-body">
                         <p class="highlight-text" style="color: var(--primary-color); font-weight: 600; margin-bottom: 5px;">34% less crowded than Gate A right now</p>
                         <p class="subtext" style="margin-bottom: 15px;" data-i18n="plan.walk">Walk time from metro: 8 min</p>
-                        <button class="action-btn">Take Me There &rightarrow;</button>
+                        <button class="action-btn" aria-label="Action button">Take Me There &rightarrow;</button>
                     </div>
                 </div>
 
@@ -85,7 +85,7 @@ export function renderPlan() {
                             <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 4px;">Exit plan ready when you need it</h3>
                             <p style="font-size: 0.85rem; color: var(--text-secondary);">Tap here 20 min before you leave</p>
                         </div>
-                        <button class="icon-btn" style="background: rgba(255,255,255,0.1);">
+                        <button class="icon-btn" style="background: rgba(255,255,255,0.1);" aria-label="Action button">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </div>

@@ -63,7 +63,7 @@ function buildThankYouHTML() {
             </div>
 
             <button class="primary-btn" id="done-btn" 
-                style="border-radius:30px; margin-top:30px; margin-bottom:0;">
+                style="border-radius:30px; margin-top:30px; margin-bottom:0;" aria-label="done btn">
                 Done
             </button>
         </div>
@@ -110,7 +110,7 @@ export function renderFeedback() {
                 <label class="feedback-q-label" data-i18n="feedback.q2">What was difficult? (select all that apply)</label>
                 <div class="chip-grid" id="chip-grid">
                     ${DIFFICULTY_CHIPS.map(c => `
-                        <button class="feedback-chip" data-chip="${c.id}">${c.label}</button>
+                        <button class="feedback-chip" data-chip="${c.id}" aria-label="Action button">${c.label}</button>
                     `).join('')}
                 </div>
             </div>
@@ -120,7 +120,7 @@ export function renderFeedback() {
                 <label class="feedback-q-label" data-i18n="feedback.q3">Did EventFlow help you today?</label>
                 <div class="help-options" id="help-options">
                     ${HELPFULNESS_OPTIONS.map(o => `
-                        <button class="help-opt-btn" data-help="${o.id}">
+                        <button class="help-opt-btn" data-help="${o.id}" aria-label="Action button">
                             <span class="help-emoji">${o.emoji}</span>
                             <span class="help-label">${o.label}</span>
                         </button>
@@ -131,7 +131,7 @@ export function renderFeedback() {
             <!-- Submit -->
             <div class="staggered-card feedback-submit-row" style="animation-delay:0.45s;">
                 <button class="primary-btn pulse-glow" id="feedback-submit-btn" disabled
-                    style="border-radius:30px; margin:0;" data-i18n="feedback.submit">
+                    style="border-radius:30px; margin:0;" data-i18n="feedback.submit" aria-label="feedback submit btn">
                     Submit Feedback
                 </button>
                 <p style="text-align:center; font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">

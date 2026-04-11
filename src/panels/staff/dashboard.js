@@ -45,7 +45,7 @@ function renderLogin() {
             '<p style="color:#888; margin-bottom:30px;">Ground Stewards — NMS Ahmedabad</p>' +
             '<select id="login-zone" style="width:100%; padding:15px; background:#222; border:1px solid #333; color:#fff; border-radius:10px; margin-bottom:20px;">' + opts + '</select>' +
             '<input type="number" id="login-id" placeholder="Staff ID (numbers only)" style="width:100%; padding:15px; background:#222; border:1px solid #333; color:#fff; border-radius:10px; margin-bottom:30px;">' +
-            '<button class="primary-btn" id="login-btn" style="width:100%; height:60px; font-weight:700; border-radius:16px;">Login to Portal</button>' +
+            '<button class="primary-btn" id="login-btn" style="width:100%; height:60px; font-weight:700; border-radius:16px;" aria-label="login btn">Login to Portal</button>' +
         '</div>' +
     '</div>';
 }
@@ -65,7 +65,7 @@ function renderHome() {
         const acked = latestInstruction.acknowledgedBy && latestInstruction.acknowledgedBy[getStaffId()];
         instrHtml = '<div style="font-size:1.15rem; color:#fff; font-weight:600; line-height:1.4;">' + (latestInstruction.message || latestInstruction.text || '') + '</div>' +
             '<div style="font-size:0.75rem; color:#666; margin-top:8px;">Zone: ' + (latestInstruction.zoneId || '') + '</div>' +
-            '<button id="ack-btn" data-iid="' + instrId + '" style="margin-top:20px; width:100%; height:50px; background:' + (acked ? '#00C49A22' : '#222') + '; border:1px solid ' + (acked ? '#00C49A' : '#444') + '; color:' + (acked ? '#00C49A' : '#fff') + '; border-radius:12px; font-weight:700; cursor:pointer;">' + (acked ? '✓ Acknowledged' : '✓ Samajh Gaya') + '</button>';
+            '<button id="ack-btn" data-iid="' + instrId + '" style="margin-top:20px; width:100%; height:50px; background:' + (acked ? '#00C49A22' : '#222') + '; border:1px solid ' + (acked ? '#00C49A' : '#444') + '; color:' + (acked ? '#00C49A' : '#fff') + '; border-radius:12px; font-weight:700; cursor:pointer;" aria-label="ack btn">' + (acked ? '✓ Acknowledged' : '✓ Samajh Gaya') + '</button>';
     }
 
     return '<div class="staff-home-container" style="padding:20px;">' +
@@ -74,14 +74,14 @@ function renderHome() {
                 '<h2 style="margin:0; color:#fff;">Zone ' + zoneParts[0] + '</h2>' +
                 '<p style="color:#888; margin:0;">Staff #' + session.staffId + ' | ' + timeStr + '</p>' +
             '</div>' +
-            '<button id="logout-btn" style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; border-radius:8px; cursor:pointer;">Logout</button>' +
+            '<button id="logout-btn" style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; border-radius:8px; cursor:pointer;" aria-label="logout btn">Logout</button>' +
         '</header>' +
 
         /* Status Toggle */
         '<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:30px;">' +
-            '<button id="btn-clear" style="height:160px; border-radius:20px; border:2px solid ' + (isClear ? '#00C49A' : '#333') + '; background:' + (isClear ? '#00C49A18' : '#1a1a1a') + '; color:' + (isClear ? '#00C49A' : '#555') + '; font-weight:700; font-size:0.95rem; cursor:pointer;">' +
+            '<button id="btn-clear" style="height:160px; border-radius:20px; border:2px solid ' + (isClear ? '#00C49A' : '#333') + '; background:' + (isClear ? '#00C49A18' : '#1a1a1a') + '; color:' + (isClear ? '#00C49A' : '#555') + '; font-weight:700; font-size:0.95rem; cursor:pointer;" aria-label="btn clear">' +
                 '<span style="font-size:2.8rem; display:block; margin-bottom:8px;">🟢</span>MY ZONE IS CLEAR</button>' +
-            '<button id="btn-crowded" style="height:160px; border-radius:20px; border:2px solid ' + (!isClear ? '#ff4d4d' : '#333') + '; background:' + (!isClear ? '#ff4d4d18' : '#1a1a1a') + '; color:' + (!isClear ? '#ff4d4d' : '#555') + '; font-weight:700; font-size:0.95rem; cursor:pointer;">' +
+            '<button id="btn-crowded" style="height:160px; border-radius:20px; border:2px solid ' + (!isClear ? '#ff4d4d' : '#333') + '; background:' + (!isClear ? '#ff4d4d18' : '#1a1a1a') + '; color:' + (!isClear ? '#ff4d4d' : '#555') + '; font-weight:700; font-size:0.95rem; cursor:pointer;" aria-label="btn crowded">' +
                 '<span style="font-size:2.8rem; display:block; margin-bottom:8px;">🔴</span>MY ZONE IS CROWDED</button>' +
         '</div>' +
 
@@ -95,10 +95,10 @@ function renderHome() {
         '<div style="margin-bottom:20px;">' +
             '<div style="font-size:0.72rem; color:#666; font-weight:800; margin-bottom:10px; letter-spacing:1.5px; text-transform:uppercase;">QUICK REPORT</div>' +
             '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">' +
-                '<button class="report-btn" data-type="crowd" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;">👥 Bheed badh rahi</button>' +
-                '<button class="report-btn" data-type="clear" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;">✅ Area clear</button>' +
-                '<button class="report-btn" data-type="medical" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;">🚑 Medical needed</button>' +
-                '<button class="report-btn" data-type="other" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;">⚠️ Kuch aur...</button>' +
+                '<button class="report-btn" data-type="crowd" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">👥 Bheed badh rahi</button>' +
+                '<button class="report-btn" data-type="clear" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">✅ Area clear</button>' +
+                '<button class="report-btn" data-type="medical" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">🚑 Medical needed</button>' +
+                '<button class="report-btn" data-type="other" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">⚠️ Kuch aur...</button>' +
             '</div>' +
         '</div>' +
 

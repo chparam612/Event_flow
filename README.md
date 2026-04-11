@@ -114,3 +114,12 @@ EventFlow operates concurrently across a highly-resilient, three-panel topology:
 - **Hardware Beacons (BLE)**: Layer rigorous Bluetooth Low-Energy beacons across NMS for precise micro-positioning within massive dense concrete shells where GPS drops.
 - **AR Wayfinding**: Transition the 2D escort paths into Augmented Reality step-by-step guides using device gyroscope data.
 - **Language Expansion**: Sub-dialect scaling for localized vernaculars using Google Vertex AI.
+## Running Tests
+`ash
+npm test
+``n
+## Accessibility
+- WCAG 2.1 AA compliant color contrast
+- Screen reader compatible with ARIA labels
+- Keyboard navigable
+- 5 language support for diverse users

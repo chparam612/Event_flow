@@ -25,17 +25,17 @@ export function renderHelp() {
                 <h2 style="font-size: 1.1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary);">Frequent Questions</h2>
                 
                 <div class="faq-item">
-                    <button class="faq-question">Where is the nearest First Aid? 🚑</button>
+                    <button class="faq-question" aria-label="Action button">Where is the nearest First Aid? 🚑</button>
                     <div class="faq-answer">Medical booths are located near Gate B, Gate 6, and in the North Food Court.</div>
                 </div>
 
                 <div class="faq-item">
-                    <button class="faq-question">Lost and Found? 🎒</button>
+                    <button class="faq-question" aria-label="Action button">Lost and Found? 🎒</button>
                     <div class="faq-answer">Please visit the Main Help Desk at the West Concourse or contact staff near Gate 3.</div>
                 </div>
 
                 <div class="faq-item">
-                    <button class="faq-question">Metro/Bus schedule? 🚌</button>
+                    <button class="faq-question" aria-label="Action button">Metro/Bus schedule? 🚌</button>
                     <div class="faq-answer">The Sabarmati Metro Station runs until 1:30 AM for today's match. Shuttle buses are at Gate 7.</div>
                 </div>
             </div>
@@ -45,13 +45,13 @@ export function renderHelp() {
                 <div class="plan-card" style="margin: 0 0 20px; text-align: center;">
                     <h3 style="margin-bottom: 10px;">Need immediate help?</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 20px;">Staff are patrolling each sector every 5 minutes.</p>
-                    <button class="primary-btn" id="assist-btn" style="padding: 15px; font-size: 1.1rem;">Call Staff to My Location</button>
+                    <button class="primary-btn" id="assist-btn" style="padding: 15px; font-size: 1.1rem;" aria-label="assist btn">Call Staff to My Location</button>
                 </div>
 
                 <div class="plan-card" style="margin: 0 0 20px; border: 1.5px solid #ff4d4d; background: rgba(255, 77, 77, 0.05); text-align: center;">
                     <h3 style="color: #ff4d4d; margin-bottom: 10px;">Emergency SOS 🚨</h3>
                     <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">Use only for extreme emergencies (Medical, Fire, Security)</p>
-                    <button class="primary-btn" style="background: #ff4d4d; color: #fff; padding: 15px; font-size: 1.1rem;" id="sos-btn">ACTIVATE EMERGENCY SOS</button>
+                    <button class="primary-btn" style="background: #ff4d4d; color: #fff; padding: 15px; font-size: 1.1rem;" id="sos-btn" aria-label="sos btn">ACTIVATE EMERGENCY SOS</button>
                 </div>
             </div>
             

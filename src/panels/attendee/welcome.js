@@ -33,7 +33,7 @@ export function renderWelcome() {
                 <h1 data-i18n="welcome.headline">Welcome to the Match!</h1>
                 <p class="subtext" data-i18n="welcome.subtext">Navigate the world's largest cricket stadium smoothly.</p>
                 
-                <button class="primary-btn pulse-glow" id="start-plan-btn" data-i18n="welcome.cta">Get My Match Plan</button>
+                <button class="primary-btn pulse-glow" id="start-plan-btn" data-i18n="welcome.cta" aria-label="start plan btn">Get My Match Plan</button>
             </main>
         </div>
     `;

@@ -70,7 +70,7 @@
 }
 .status-display {
     text-align: center;
-    font-size: 0.95rem;
+    font-size: 1rem;
     letter-spacing: 0.5px;
     margin-bottom: 4px;
 }
@@ -90,7 +90,7 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 800;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
@@ -119,7 +119,7 @@
     position: relative;
 }
 .card-label {
-    font-size: 0.7rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--staff-secondary);
     text-transform: uppercase;
@@ -133,7 +133,7 @@
     margin-bottom: 8px;
 }
 .instruction-meta {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: var(--staff-secondary);
     margin-bottom: 16px;
 }
@@ -157,7 +157,7 @@
     background: none;
     border: none;
     color: var(--staff-secondary);
-    font-size: 0.85rem;
+    font-size: 1rem;
     text-align: center;
     cursor: pointer;
 }
@@ -177,7 +177,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -229,17 +229,17 @@
     margin-bottom: 12px;
     border: 1px solid rgba(255,255,255,0.05);
 }
-.history-time { font-size: 0.75rem; color: var(--staff-secondary); margin-bottom: 4px; }
+.history-time { font-size: 1rem; color: var(--staff-secondary); margin-bottom: 4px; }
 .history-text { font-size: 1rem; font-weight: 500; line-height: 1.4; }
-.history-status { font-size: 0.7rem; text-transform: uppercase; color: var(--staff-accent); margin-top: 8px; font-weight: 700; }
+.history-status { font-size: 1rem; text-transform: uppercase; color: var(--staff-accent); margin-top: 8px; font-weight: 700; }
 
 /* ── iPhone SE (375px) Overrides ── */
 @media (max-width: 375px) {
     .staff-main-content { padding: 12px; gap: 16px; min-height: 100vh; }
     .big-toggle-grid { height: 180px; gap: 10px; }
-    .status-btn { padding: 12px; font-size: 0.8rem; }
+    .status-btn { padding: 12px; font-size: 1rem; }
     .instruction-card { padding: 16px; margin: 0; }
     .ack-btn { height: 48px; }
     .emoji-report-grid { gap: 8px; }
-    .emoji-btn { padding: 12px 8px; font-size: 0.75rem; }
+    .emoji-btn { padding: 12px 8px; font-size: 1rem; }
 }

@@ -15,11 +15,11 @@ export function renderLanguage() {
                 <h1 data-i18n="language.choose">Choose your language</h1>
                 
                 <div class="lang-grid">
-                    <button class="lang-btn" data-lang="en">English</button>
-                    <button class="lang-btn" data-lang="hi">हिंदी</button>
-                    <button class="lang-btn" data-lang="gu">ગુજરાતી</button>
-                    <button class="lang-btn" data-lang="ta">தமிழ்</button>
-                    <button class="lang-btn" data-lang="te">తెలుగు</button>
+                    <button class="lang-btn" data-lang="en" aria-label="Action button">English</button>
+                    <button class="lang-btn" data-lang="hi" aria-label="Action button">हिंदी</button>
+                    <button class="lang-btn" data-lang="gu" aria-label="Action button">ગુજરાતી</button>
+                    <button class="lang-btn" data-lang="ta" aria-label="Action button">தமிழ்</button>
+                    <button class="lang-btn" data-lang="te" aria-label="Action button">తెలుగు</button>
                 </div>
             </main>
         </div>

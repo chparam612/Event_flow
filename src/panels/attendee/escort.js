@@ -2,7 +2,7 @@ export function renderEscort() {
     return `
         <div class="attendee-screen" id="escort-screen">
             <header class="attendee-top-bar glass">
-                <button class="icon-btn" id="escort-back-btn">
+                <button class="icon-btn" id="escort-back-btn" aria-label="escort back btn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 </button>
                 <div class="header-title">Navigation</div>
@@ -25,8 +25,8 @@ export function renderEscort() {
                         <h2 class="escort-instruction-text">Calculating optimal route...</h2>
                     </div>
                     <div class="escort-actions">
-                        <button class="secondary-btn" id="escort-prev" disabled>Previous</button>
-                        <button class="primary-btn" id="escort-next">Next Step →</button>
+                        <button class="secondary-btn" id="escort-prev" disabled aria-label="escort prev">Previous</button>
+                        <button class="primary-btn" id="escort-next" aria-label="escort next">Next Step →</button>
                     </div>
                 </div>
             </main>

@@ -129,7 +129,7 @@ export function renderExit() {
                 <span class="dot pulse"></span>
                 <span id="live-meta-text" style="font-size:0.85rem; color:var(--text-secondary);">Refreshing crowd data...</span>
             </div>
-            <button class="primary-btn pulse-glow" id="start-exit-btn" disabled style="margin-bottom: 0;">
+            <button class="primary-btn pulse-glow" id="start-exit-btn" disabled style="margin-bottom: 0;" aria-label="start exit btn">
                 Start Exit Guide →
             </button>
         </footer>

@@ -204,9 +204,9 @@ export function renderControl() {
     /* ── BOTTOM BAR: Simulation Controls ── */
     '<footer class="cr-bottom-bar" id="cr-sim-bar">' +
         '<div class="cr-sim-controls">' +
-            '<button class="cr-sim-btn" id="sim-play">&#9654; Play</button>' +
-            '<button class="cr-sim-btn" id="sim-pause">&#9208; Pause</button>' +
-            '<button class="cr-sim-btn" id="sim-ff">&#9193; Fast 5x</button>' +
+            '<button class="cr-sim-btn" id="sim-play" aria-label="sim play">&#9654; Play</button>' +
+            '<button class="cr-sim-btn" id="sim-pause" aria-label="sim pause">&#9208; Pause</button>' +
+            '<button class="cr-sim-btn" id="sim-ff" aria-label="sim ff">&#9193; Fast 5x</button>' +
         '</div>' +
         '<div class="cr-sim-timeline">' +
             '<span>6PM</span>' +
@@ -398,13 +398,13 @@ function refreshDispatch(densities) {
         '</div>' +
         '<div class="cr-dispatch-quick">' +
             QUICK_INSTRUCTIONS.map(instr =>
-                '<button class="cr-quick-btn" data-instr="' + instr + '">' + instr + '</button>'
+                '<button class="cr-quick-btn" data-instr="' + instr + '" aria-label="Action button">' + instr + '</button>'
             ).join('') +
         '</div>' +
         '<div class="cr-dispatch-nudge">' +
             '<label class="cr-nudge-label">Send nudge to ' + selectedZone + ' attendees?</label>' +
             '<input type="text" class="cr-nudge-input" id="nudge-msg" placeholder="Gate 11 is clearest right now" value="Gate 11 is clearest right now"/>' +
-            '<button class="cr-send-all-btn" id="send-staff-attendee">SEND TO STAFF + ATTENDEES</button>' +
+            '<button class="cr-send-all-btn" id="send-staff-attendee" aria-label="send staff attendee">SEND TO STAFF + ATTENDEES</button>' +
         '</div>';
 
     // Bind quick instruction buttons

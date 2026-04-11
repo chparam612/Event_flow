@@ -4,12 +4,14 @@
   "description": "EventFlow crowd management system",
   "main": "index.js",
   "scripts": {
-    "dev":    "node server.js",
-    "build":  "node build.js",
-    "deploy": "npm run build && npx firebase-tools deploy --only hosting"
+    "dev": "node server.js",
+    "build": "node build.js",
+    "deploy": "npm run build && npx firebase-tools deploy --only hosting",
+    "test": "node tests/simulation.test.js"
   },
   "dependencies": {
-    "firebase": "^10.8.0"
+    "firebase": "^10.8.0",
+    "puppeteer-core": "^24.40.0"
   },
   "devDependencies": {
     "firebase-tools": "^13.3.0"
