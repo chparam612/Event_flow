@@ -3,7 +3,7 @@
  * Centralized Google Maps logic with Density markers and High-Fidelity SVG Fallback.
  */
 
-const NMS_CENTER = { lat: 23.0919, lng: 72.5975 }; // Narendra Modi Stadium
+const NMS_CENTER = { lat: 23.0925, lng: 72.5952 }; // Narendra Modi Stadium
 
 const DENSITY_COLORS = {
     GREEN:  '#00C49A',
@@ -12,8 +12,8 @@ const DENSITY_COLORS = {
 };
 
 const getDensityColor = (score) => {
-    if (score > 0.85) return DENSITY_COLORS.RED;
-    if (score > 0.6)  return DENSITY_COLORS.YELLOW;
+    if (score > 0.80) return DENSITY_COLORS.RED;
+    if (score > 0.60) return DENSITY_COLORS.YELLOW;
     return               DENSITY_COLORS.GREEN;
 };
 

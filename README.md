@@ -53,6 +53,8 @@ EventFlow operates concurrently across a highly-resilient, three-panel topology:
 - **Firebase Realtime Database** — Enables the lightning-fast, tridirectional live sync between Attendee, Staff, and Control panels via WebSocket listeners.
 - **Firebase Hosting** — Deployment pipeline for the edge-cached frontend.
 - **Google Maps JavaScript API** — Drives the localized attendee venue representations and navigational waypointing.
+   - Map centered on NMS: lat 23.0925, lng 72.5952
+   - SVG fallback map included for offline/no-key usage
 - **Google Translate API** — Empowers our underlying dynamically loaded `i18n` matrix, seamlessly scaling across 5 languages (English, Hindi, Gujarati, Tamil, Telugu) synchronously.
 
 ## How It Works
@@ -93,8 +95,14 @@ EventFlow operates concurrently across a highly-resilient, three-panel topology:
    \`\`\`bash
    npm install
    \`\`\`
-3. **Environment Variables**:
-   In `index.html`, replace \`{{GOOGLE_MAPS_API_KEY}}\` with a valid active Google Maps API key supporting Maps JS API. Ensure Firebase config variables in `src/firebase.js` map to your test database.
+3. **Google Maps Setup**:
+   In `index.html`, the Google Maps API is 
+   pre-configured for the live demo. For local 
+   development, replace the Maps API key in 
+   `index.html` with your own key from 
+   [Google Cloud Console](https://console.cloud.google.com).
+   The app includes a built-in SVG venue map 
+   as fallback — it works without this step.
 4. **Run Local Server**:
    \`\`\`bash
    node server.js
