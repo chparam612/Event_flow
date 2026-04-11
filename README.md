@@ -10,7 +10,7 @@
 
 | Attendee App (PWA) | Staff App (Steward) | Control Room (Command Center) |
 |:---:|:---:|:---:|
-| <img src="public/screenshots/attendee.png" height="350"> | <img src="public/screenshots/staff.png" height="350"> | <img src="public/screenshots/controlroom.png" height="350"> |
+| <img src="public/screenshots/attendee.png" height="350"> | <img src="public/screenshots/staff.png" height="350"> | <img src="public/screenshots/control.png" height="350"> |
 
 
 ## Problem Statement
