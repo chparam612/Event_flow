@@ -1,6 +1,7 @@
-const CACHE_NAME = 'eventflow-v2';
+const CACHE_NAME = 'eventflow-v3';
 const STATIC_ASSETS = [
     '/',
+    '/attendee',
     '/index.html',
     '/css/styles.css',
     '/src/styles/attendee.css',
@@ -11,6 +12,7 @@ const STATIC_ASSETS = [
     '/src/firebase.js',
     '/src/simulation.js',
     '/src/mapHelper.js',
+    '/src/panels/landing/index.js',
     '/src/panels/attendee/welcome.js',
     '/src/panels/attendee/language.js',
     '/src/panels/attendee/intake.js',
@@ -24,11 +26,11 @@ const STATIC_ASSETS = [
     '/src/panels/staff/dashboard.js',
     '/src/panels/controlroom/dashboard.js',
     // i18n
-    '/src/i18n/ar.json',
     '/src/i18n/en.json',
-    '/src/i18n/es.json',
     '/src/i18n/hi.json',
-    '/src/i18n/zh.json'
+    '/src/i18n/gu.json',
+    '/src/i18n/ta.json',
+    '/src/i18n/te.json'
 ];
 
 self.addEventListener('install', (event) => {
