@@ -7,6 +7,8 @@ import {
     writeStaff, listenInstructions, acknowledgeInstruction,
     listenZones, pushData, listen
 } from '/src/firebase.js';
+import { logout } from '/src/auth.js';
+
 
 const STAFF_ZONES = [
     'N1 North', 'N2 North', 'N3 North', 'N4 North',
@@ -185,15 +187,14 @@ export function initStaff() {
         }, 600); // simulate network delay for UX
     });
 
-    // Logout
-    app.querySelector('#logout-btn')?.addEventListener('click', () => {
+    // Logout — calls Firebase signOut + redirects to /
+    app.querySelector('#logout-btn')?.addEventListener('click', async () => {
         if (session) {
             writeStaff(session.staffId, { zoneId: session.zone, status: 'clear', online: false });
         }
-        localStorage.removeItem('eventflow_staff_session');
-        session = null;
-        refreshUI();
+        await logout(); // clears storage + redirects to /
     });
+
 
     // Status toggles
     app.querySelector('#btn-clear')?.addEventListener('click', () => setStatus('clear'));

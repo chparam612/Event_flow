@@ -9,6 +9,8 @@ import {
     pushInstruction, pushNudge, writeZone,
     pushData
 } from '/src/firebase.js';
+import { logout } from '/src/auth.js';
+
 
 /* ─── Constants ──────────────────────────────────────────────── */
 const STAFF_ROSTER = [
@@ -153,6 +155,7 @@ export function renderControl() {
         '<div class="cr-header-right">' +
             '<div class="cr-header-stat" id="cr-header-count">— inside</div>' +
             '<div class="cr-time-box"><span class="cr-sim-time" id="cr-sim-time">18:00</span></div>' +
+            '<button id="cr-logout-btn" aria-label="Logout from Control Room" style="background:transparent;border:1px solid #333;color:#555;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.78rem;margin-left:12px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor=\'#ff4d4d\';this.style.color=\'#ff4d4d\'" onmouseout="this.style.borderColor=\'#333\';this.style.color=\'#555\'">Logout</button>' +
         '</div>' +
     '</header>' +
 
@@ -222,6 +225,11 @@ export function renderControl() {
 /* ─── Init ───────────────────────────────────────────────────── */
 export function initControl() {
     const densities = getZoneDensity();
+
+    // Logout button
+    document.getElementById('cr-logout-btn')?.addEventListener('click', async () => {
+        await logout();
+    });
 
     // Initial renders
     refreshMap(densities);

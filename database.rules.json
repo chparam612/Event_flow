@@ -1,21 +1,25 @@
 {
   "rules": {
     "zones": {
-      "$zoneId": {
-        ".read": true,
-        ".write": "auth != null && (root.child('roles/' + auth.uid).val() === 'control' || root.child('roles/' + auth.uid).val() === 'staff')"
-      }
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.contains('control')"
     },
     "staff": {
+      ".read": "auth != null",
       "$staffId": {
-        ".read": "auth != null",
-        ".write": "auth != null && (auth.uid === $staffId || root.child('roles/' + auth.uid).val() === 'control')"
+        ".write": "auth != null && auth.token.email != null && auth.token.email.contains('staff')"
+      }
+    },
+    "attendees": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
       }
     },
     "instructions": {
       ".read": "auth != null",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.contains('control')",
       "$instructionId": {
-        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'control'",
         "acknowledgedBy": {
           "$ackId": {
             ".write": "auth != null"
@@ -24,26 +28,16 @@
       }
     },
     "nudges": {
-      ".read": true,
-      "$nudgeId": {
-        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'control'"
-      }
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.contains('control')"
     },
     "feedback": {
-      ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'control'",
-      "$timestamp": {
-        ".write": true
-      }
+      ".write": "auth != null",
+      ".read": "auth != null && auth.token.email != null && auth.token.email.contains('control')"
     },
-    "attendees": {
-      "$sessionId": {
-        ".read": "auth == null || auth.uid === $sessionId || root.child('roles/' + auth.uid).val() === 'control'",
-        ".write": "auth == null || auth.uid === $sessionId"
-      }
-    },
-    "roles": {
-      ".read": "auth != null",
-      ".write": false
+    "reports": {
+      ".write": "auth != null",
+      ".read": "auth != null && auth.token.email != null && auth.token.email.contains('control')"
     }
   }
 }
