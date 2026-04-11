@@ -1,35 +1,52 @@
-import { renderLanding, initLanding }     from '/src/panels/landing/index.js';
-import { renderWelcome, initWelcome }   from '/src/panels/attendee/welcome.js';
-import { renderLanguage, initLanguage } from '/src/panels/attendee/language.js';
-import { renderIntake, initIntake }     from '/src/panels/attendee/intake.js';
-import { renderPlan, initPlan }         from '/src/panels/attendee/plan.js';
-import { renderEscort, initEscort }     from '/src/panels/attendee/escort.js';
-import { renderDuring, initDuring }     from '/src/panels/attendee/during.js';
-import { renderExit, initExit }         from '/src/panels/attendee/exit.js';
-import { renderFeedback, initFeedback } from '/src/panels/attendee/feedback.js';
-import { renderStaff, initStaff }       from '/src/panels/staff/dashboard.js';
-import { renderControl, initControl }   from '/src/panels/controlroom/dashboard.js';
-import { renderHelp, initHelp }         from '/src/panels/attendee/help.js';
-import { renderHow, initHow }           from '/src/panels/attendee/how.js';
+import { renderLanding, initLanding }         from '/src/panels/landing.js';
+import { renderWelcome, initWelcome }         from '/src/panels/attendee/welcome.js';
+import { renderLanguage, initLanguage }       from '/src/panels/attendee/language.js';
+import { renderIntake, initIntake }           from '/src/panels/attendee/intake.js';
+import { renderPlan, initPlan }               from '/src/panels/attendee/plan.js';
+import { renderEscort, initEscort }           from '/src/panels/attendee/escort.js';
+import { renderDuring, initDuring }           from '/src/panels/attendee/during.js';
+import { renderExit, initExit }               from '/src/panels/attendee/exit.js';
+import { renderFeedback, initFeedback }       from '/src/panels/attendee/feedback.js';
+import { renderStaffLogin, initStaffLogin }   from '/src/panels/staff/login.js';
+import { renderStaff, initStaff }             from '/src/panels/staff/dashboard.js';
+import { renderControlLogin, initControlLogin } from '/src/panels/controlroom/login.js';
+import { renderControl, initControl }         from '/src/panels/controlroom/dashboard.js';
+import { renderHelp, initHelp }               from '/src/panels/attendee/help.js';
+import { renderHow, initHow }                 from '/src/panels/attendee/how.js';
+import { getCurrentUser }                     from '/src/auth.js';
 
 const appDiv = document.getElementById('app');
 
+/* ─── Routes ─────────────────────────────────────────── */
 const routes = {
-    '/': 'landing',
-    '/attendee': 'attendee',
-    '/language': 'language',
-    '/intake': 'intake',
-    '/plan': 'plan',
-    '/escort': 'escort',
-    '/during': 'during',
-    '/exit': 'exit',
-    '/feedback': 'feedback',
-    '/staff': 'staff',
-    '/control': 'control',
-    '/help': 'help',
-    '/how-it-works': 'how'
+    '/':               'landing',
+    '/attendee':       'attendee',
+    '/language':       'language',
+    '/intake':         'intake',
+    '/plan':           'plan',
+    '/escort':         'escort',
+    '/during':         'during',
+    '/exit':           'exit',
+    '/feedback':       'feedback',
+    '/staff-login':    'staff-login',
+    '/staff':          'staff',
+    '/control-login':  'control-login',
+    '/control':        'control',
+    '/help':           'help',
+    '/how-it-works':   'how'
 };
 
+/* ─── Auth Guard ─────────────────────────────────────── */
+function requireAuth(redirectTo) {
+    const user = getCurrentUser();
+    if (!user) {
+        window.history.replaceState(null, null, redirectTo);
+        return false;
+    }
+    return true;
+}
+
+/* ─── Render Panel ───────────────────────────────────── */
 const renderPanel = (panelName) => {
     switch(panelName) {
         case 'landing':
@@ -64,19 +81,29 @@ const renderPanel = (panelName) => {
             appDiv.innerHTML = renderExit();
             initExit();
             break;
-        case 'how':
-            appDiv.innerHTML = renderHow();
-            initHow();
-            break;
-        case 'staff':
-            appDiv.innerHTML = renderStaff();
-            initStaff();
-            break;
         case 'feedback':
             appDiv.innerHTML = renderFeedback();
             initFeedback();
             break;
+        case 'how':
+            appDiv.innerHTML = renderHow();
+            initHow();
+            break;
+        case 'staff-login':
+            appDiv.innerHTML = renderStaffLogin();
+            initStaffLogin();
+            break;
+        case 'staff':
+            if (!requireAuth('/staff-login')) { renderPanel('staff-login'); return; }
+            appDiv.innerHTML = renderStaff();
+            initStaff();
+            break;
+        case 'control-login':
+            appDiv.innerHTML = renderControlLogin();
+            initControlLogin();
+            break;
         case 'control':
+            if (!requireAuth('/control-login')) { renderPanel('control-login'); return; }
             appDiv.innerHTML = renderControl();
             initControl();
             break;
@@ -87,14 +114,14 @@ const renderPanel = (panelName) => {
         default:
             appDiv.innerHTML = `
                 <div class="panel error-panel">
-                    <h1 class="title">404 - Not Found</h1>
-                    <div class="panel-content" style="text-align: center; padding: 40px;">
-                        <h2 style="font-size: 3rem; color: var(--primary-color); margin-bottom: 10px;">Oops!</h2>
-                        <p style="color: var(--text-secondary); margin-bottom: 25px;">The requested panel does not exist or has been moved.</p>
-                        <a href="/" data-link style="display: inline-block; padding: 10px 24px; background: var(--primary-color); color: #000; text-decoration: none; border-radius: var(--br-sm); font-weight: 600;">Return Home</a>
+                    <div style="text-align:center; padding:60px 20px;">
+                        <h2 style="font-size:3rem; color:#00C49A; margin-bottom:10px;">404</h2>
+                        <p style="color:#555; margin-bottom:25px;">Page not found.</p>
+                        <a href="/" data-link style="display:inline-block; padding:12px 28px;
+                           background:#00C49A; color:#000; text-decoration:none;
+                           border-radius:12px; font-weight:700;">Return Home</a>
                     </div>
-                </div>
-            `;
+                </div>`;
             break;
     }
 };
@@ -107,7 +134,7 @@ const router = () => {
 
 window.addEventListener('popstate', router);
 
-console.log('EventFlow Router Initializing...');
+console.log('EventFlow Router v2 Initializing...');
 if (appDiv) {
     router();
 } else {

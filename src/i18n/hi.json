@@ -1,12 +1,26 @@
 {
   "landing": {
-    "tagline": "नरेंद्र मोदी स्टेडियम — स्मार्ट भीड़ गाइड",
+    "title": "EventFlow",
+    "subtitle": "नरेंद्र मोदी स्टेडियम — स्मार्ट भीड़ प्रबंधन",
     "attendee_title": "मैच दर्शक",
     "attendee_sub": "अपना व्यक्तिगत मैच प्लान पाएं",
+    "attendee_btn": "फैन के रूप में प्रवेश करें",
     "staff_title": "ग्राउंड स्टाफ",
-    "staff_sub": "ज़ोन रिपोर्टिंग और निर्देश",
+    "staff_sub": "ज़ोन रिपोर्टिंग और लाइव निर्देश",
+    "staff_btn": "स्टाफ लॉगिन",
     "control_title": "कंट्रोल रूम",
-    "control_sub": "कमांड सेंटर एक्सेस"
+    "control_sub": "कमांड सेंटर — सिर्फ अधिकृत व्यक्ति",
+    "control_btn": "कंट्रोल लॉगिन"
+  },
+  "auth": {
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "login": "लॉगिन",
+    "logging_in": "लॉगिन हो रहा है...",
+    "error_invalid": "गलत ईमेल या पासवर्ड",
+    "error_network": "नेटवर्क एरर",
+    "demo_credentials": "डेमो क्रेडेंशियल",
+    "logout": "लॉगआउट"
   },
   "app": {
     "title": "EventFlow",

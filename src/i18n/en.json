@@ -1,12 +1,26 @@
 {
   "landing": {
-    "tagline": "Narendra Modi Stadium — Smart Crowd Guide",
+    "title": "EventFlow",
+    "subtitle": "Narendra Modi Stadium — Smart Crowd Management",
     "attendee_title": "Match Attendee",
-    "attendee_sub": "Get your personal match plan",
+    "attendee_sub": "Get your personal crowd-free plan",
+    "attendee_btn": "Enter as Fan",
     "staff_title": "Ground Staff",
-    "staff_sub": "Zone reporting & instructions",
+    "staff_sub": "Zone reporting & live instructions",
+    "staff_btn": "Staff Login",
     "control_title": "Control Room",
-    "control_sub": "Command center access"
+    "control_sub": "Command center — authorized only",
+    "control_btn": "Control Login"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "logging_in": "Logging in...",
+    "error_invalid": "Invalid email or password.",
+    "error_network": "Network error. Please check connection.",
+    "demo_credentials": "Demo Credentials",
+    "logout": "Logout"
   },
   "app": {
     "title": "EventFlow",
