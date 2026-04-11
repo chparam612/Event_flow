@@ -132,9 +132,14 @@ export function renderLanding() {
 }
 
 export function initLanding() {
+    // Use global navigate to handle popstate automatically if available
     const navigate = (path) => {
-        window.history.pushState(null, null, path);
-        window.dispatchEvent(new Event('popstate'));
+        if (window.navigate) {
+            window.navigate(path);
+        } else {
+            window.history.pushState(null, null, path);
+            window.dispatchEvent(new Event('popstate'));
+        }
     };
 
     // ── Fan Button: Anonymous Auth → /attendee ─────────────────
