@@ -162,10 +162,23 @@ npm test
 ```
 
 ## Accessibility
-- WCAG 2.1 AA compliant color contrast
-- Screen reader compatible with ARIA labels
-- Keyboard navigable
-- 5 language support for diverse users
+
+EventFlow is designed to be inclusive by default:
+
+- **5 Language Support** — English, Hindi, Gujarati,
+  Tamil, Telugu for diverse Indian cricket audiences
+- **One-handed Operation** — Staff panel designed for
+  single thumb use while standing in a crowd
+- **Large Touch Targets** — All interactive elements
+  minimum 44x44px for easy tapping
+- **High Contrast** — Dark theme with sufficient
+  contrast ratios for outdoor/bright sunlight use
+- **Offline Capable** — Service Worker caches critical
+  content for low-network stadium environments
+- **Screen Reader Support** — Semantic HTML with ARIA
+  labels on key interactive elements
+- **No Hardware Required** — Works on any modern
+  smartphone browser, no app install needed
 
 ## Future Roadmap
 - **Google Cloud Vision API** — Wire CCTV feeds for real
