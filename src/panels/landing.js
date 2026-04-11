@@ -3,7 +3,8 @@
  * Route: /
  * "Enter as Fan" → loginAnonymously() → /attendee
  */
-import { loginAnonymously } from '/src/auth.js';
+import { loginAsAttendee } from '/src/auth.js';
+
 
 export function renderLanding() {
     return `
@@ -140,17 +141,16 @@ export function initLanding() {
     document.getElementById('btn-fan')?.addEventListener('click', async (e) => {
         e.stopPropagation();
         const btn = document.getElementById('btn-fan');
-        const originalText = btn.textContent;
         btn.textContent = 'Setting up...';
         btn.disabled = true;
         btn.style.opacity = '0.7';
 
         try {
-            await loginAnonymously();
+            await loginAsAttendee();
             navigate('/attendee');
-        } catch (err) {
-            console.warn('Anonymous auth failed:', err.message);
-            // Graceful fallback — still let them in
+        } catch (error) {
+            console.error('Could not start session:', error);
+            // Graceful fallback — still let user in
             navigate('/attendee');
         }
     });

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eventflow-v4';
+const CACHE_NAME = 'eventflow-v5';
 const STATIC_ASSETS = [
     '/',
     '/attendee',

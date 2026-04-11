@@ -17,11 +17,14 @@ import { waitForAuthReady }                     from '/src/auth.js';
 
 const appDiv = document.getElementById('app');
 
-/* ─── Navigate helper ────────────────────────────────── */
+/* ─── Navigate helper (global) ───────────────────────── */
 function navigate(path) {
-    window.history.replaceState(null, null, path);
+    window.history.pushState({}, '', path);
     router();
 }
+// Expose globally so panel modules can call window.navigate('/path')
+window.navigate = navigate;
+
 
 /* ─── Loading Spinner ────────────────────────────────── */
 function showAuthLoading() {

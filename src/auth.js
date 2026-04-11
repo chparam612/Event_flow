@@ -53,14 +53,20 @@ export async function loginAnonymously() {
         const cred = await signInAnonymously(auth);
         localStorage.setItem('eventflow_role', 'attendee');
         localStorage.setItem('eventflow_uid', cred.user.uid);
+        console.log('Anonymous login success:', cred.user.uid);
         return cred.user;
     } catch (error) {
-        throw new Error('Session setup failed. Please check connection.');
+        console.error('Anonymous login failed:', error.code, error.message);
+        throw new Error('Session setup failed: ' + (error.message || ''));
     }
 }
 
+// Alias — used in landing.js
+export const loginAsAttendee = loginAnonymously;
+
 /* ─── Logout ─────────────────────────────────────────── */
 export async function logout() {
+    console.log('Logout called');
     try {
         if (auth) await signOut(auth);
     } catch (e) {
@@ -70,9 +76,10 @@ export async function logout() {
         sessionStorage.clear();
         localStorage.removeItem('eventflow_staff_session');
         localStorage.removeItem('eventflow_control_session');
+        localStorage.removeItem('eventflow_zone');
         localStorage.removeItem('eventflow_role');
         localStorage.removeItem('eventflow_uid');
-        // Hard redirect to landing (clears any router state)
+        // Hard redirect to landing page
         window.location.href = '/';
     }
 }
