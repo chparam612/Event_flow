@@ -1,15 +1,76 @@
 # EventFlow — Smart Crowd Management for NMS
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://studio-5460981965-b6a76.web.app/)
+[![Attendee App](https://img.shields.io/badge/Attendee-App-blue)](https://studio-5460981965-b6a76.web.app/)
+[![Staff Panel](https://img.shields.io/badge/Staff-Panel-orange)](https://studio-5460981965-b6a76.web.app/staff)
+[![Control Room](https://img.shields.io/badge/Control-Room-red)](https://studio-5460981965-b6a76.web.app/control)
 
-
-![EventFlow Architecture](public/icon.svg)
-
-
-
+## Live Demo Links
+| Panel | URL | Device |
+|-------|-----|--------|
+| 📱 Attendee App | https://studio-5460981965-b6a76.web.app/ | Mobile |
+| 🧑✈️ Staff Panel | https://studio-5460981965-b6a76.web.app/staff | Mobile |
+| 🖥️ Control Room | https://studio-5460981965-b6a76.web.app/control | Desktop |
 
 ## Problem Statement
-Managing a crowd of 132,000 people at a venue like the Narendra Modi Stadium (NMS) presents overwhelming logistical challenges. Massive sudden surges during entry, exit, or intermission lead to dangerous bottlenecks, anxiety-inducing wait times, and extreme strain on ground staff. Traditional PA announcements and static signages fail because they lag behind real-time shifts in density and often incite panic by directing massive uncoordinated swarms toward singular "optimal" choke-points. The fundamental physical event experience is heavily degraded by unpredictable crowding.
+Managing a crowd of 132,000 people at Narendra Modi Stadium
+(NMS), Ahmedabad presents overwhelming logistical challenges.
+Massive surges during entry, exit, and innings breaks cause
+dangerous bottlenecks. Traditional PA announcements and static
+signage fail because they lag behind real-time crowd shifts and
+often incite panic. The fundamental physical event experience
+is degraded by unpredictable crowding and broken trust between
+venue systems and attendees.
+
+## Our Vertical
+**Physical Event Experience** — Narendra Modi Stadium,
+Ahmedabad (132,000 capacity cricket venue)
+
+## The Core Insight
+Existing solutions dictate behavior uniformly — blasting
+"Use Gate C" to 50,000 people shifts the bottleneck, not
+solves it. Our **trust-first approach** gives each user a
+personally optimized, transparent view of hyper-local crowd
+reality. Users make self-interested decisions that naturally
+create systemic equilibrium — without being commanded.
+
+## Biomimicry Approach
+We looked to nature for solutions humans solved millions of
+years before technology existed:
+
+- **Ant Pheromone Logic** — Like ants following the strongest
+  trail, EventFlow dynamically strengthens the signal of clear
+  paths and fades crowded ones. Users always see only the best
+  option, never the problem.
+- **Fish School Coordination** — Like fish moving as one unit
+  without a leader, EventFlow silently clusters groups of
+  similar size and destination together, distributing load
+  organically without users knowing they are coordinated.
+- **Waggle Dance Pre-Planning** — Like bees reporting the best
+  pollen source before the hive moves, our pre-match intake
+  models crowd flow before a single fan reaches the gates.
+
+## Solution Architecture
+
+### 📱 Attendee Portal (/)
+Mobile-first PWA for fans. Provides personalized arrival plans,
+live step-by-step escort navigation, smart contextual nudges
+before congestion forms, group coordination tools, tiered exit
+planning, and post-match feedback. Available in 5 languages.
+Works offline via Service Worker.
+
+### 🧑✈️ Staff Panel (/staff)
+Ultra-fast one-handed mobile UI for ground stewards. Two-tap
+zone status reporting (Clear/Crowded), instant receipt of
+Control Room instructions with acknowledgment, and quick
+incident reporting. Designed for a steward moving through
+a crowd.
+
+### 🖥️ Control Room (/control)
+Desktop command center with live interactive NMS SVG schematic.
+Real-time crowd density heatmap, staff status tracking,
+instruction dispatch to specific zones, attendee nudge
+broadcasting, and full simulation timeline control for demo.
 
 ## Screenshots
 
@@ -17,7 +78,7 @@ Managing a crowd of 132,000 people at a venue like the Narendra Modi Stadium (NM
 ![Attendee Portal](public/screenshots/attendee.png)
 *Personalized match plan with live zone status*
 
-### Staff Panel (Ground Steward)  
+### Staff Panel (Ground Steward)
 ![Staff Panel](public/screenshots/staff.png)
 *One-tap zone reporting with instant control room sync*
 
@@ -25,100 +86,99 @@ Managing a crowd of 132,000 people at a venue like the Narendra Modi Stadium (NM
 ![Control Room](public/screenshots/control.png)
 *Live NMS schematic with crowd density simulation*
 
-## Our Vertical
-**Physical Event Experience** — Narendra Modi Stadium, Ahmedabad (132,000 capacity cricket venue)
-
-## The Core Insight
-Existing crowd control solutions dictate behavior uniformly—blasting "Use Gate C" to 50,000 people at once, which merely shifts the bottleneck rather than solving it. 
-**Our trust-first approach** fundamentally shifts paradigm: we do not command the crowd; we transparently surface hyper-local realities. By giving subsets of users slightly divergent, personally optimized data based on live density variables, we establish deep trust. Users make self-interested decisions that naturally map to systemic equilibrium. 
-
-## Biomimicry Approach  
-We sought answers from nature, leveraging evolutionary algorithms of swarm intelligence:
-* **Ant Pheromone Logic**: Like ants follow the strongest trail, EventFlow dynamically degrades the digital signal (UI routing prominence) of crowded paths and reinforces clear ones. 
-* **Fish School Coordination**: Like fish seamlessly maintaining distance while moving as a macro-unit, EventFlow latently coordinates groups of similar size and destination together—distributing the load organically.
-* **Waggle Dance Pre-Planning**: Much like bees reporting the best nectar sources to prepare the hive, our pre-match attendee intake allows us to model intended flow loads before fans even reach the perimeter.
-
-## Solution Architecture
-EventFlow operates concurrently across a highly-resilient, three-panel topology:
-
-1. **Attendee Portal (`/`)**
-   A mobile-first, Progressive Web App (PWA) designed for fans. It provides personalized arrival plans, live route guidance (optimized away from surges), smart contextual nudges (e.g., "Grab food now, N2 queue is 2 mins"), SOS functionalities, and instant translation across 5 native languages. Works offline via Service Worker caching.
-2. **Staff Panel (`/staff`)**
-   An ultra-fast, one-handed mobile reporting UI deployed to ground stewards. It enables rapid status updates (Clear vs. Crowded), quick-emoji incident reporting, and real-time receipt/acknowledgment of commands issued by the central command.
-3. **Control Room (`/control`)**
-   A data-dense, desktop-first command center featuring a live interactive SVG simulation of the NMS schematic. It acts as the algorithmic brain, pulling ground-truth from stewards, projecting density heatmaps, and allowing dispatchers to push targeted instructions or "Zero-Friction Nudges."
-
 ## Google Services Used
-- **Firebase Realtime Database** — Enables the lightning-fast, tridirectional live sync between Attendee, Staff, and Control panels via WebSocket listeners.
-- **Firebase Hosting** — Deployment pipeline for the edge-cached frontend.
-- **Google Maps JavaScript API** — Drives the localized attendee venue representations and navigational waypointing.
-   - Map centered on NMS: lat 23.0925, lng 72.5952
-   - SVG fallback map included for offline/no-key usage
-- **Google Translate API** — Empowers our underlying dynamically loaded `i18n` matrix, seamlessly scaling across 5 languages (English, Hindi, Gujarati, Tamil, Telugu) synchronously.
+- **Firebase Realtime Database** — Tridirectional live sync
+  between all three panels via WebSocket listeners
+- **Firebase Hosting** — Edge-cached frontend deployment
+- **Google Maps JavaScript API** — Venue zone mapping with
+  NMS coordinates (lat: 23.0925, lng: 72.5952) and SVG
+  fallback for offline use
+- **Google Translate API** — Powers the i18n system across
+  5 languages: English, Hindi (हिंदी), Gujarati (ગુજરાતી),
+  Tamil (தமிழ்), Telugu (తెలుగు)
 
 ## How It Works
-1. **Pre-Event (Waggle Dance)**: Ticket holders receive SMS links to the Attendee portal, completing a 15-second intake (origin, group size, special needs). The algorithm provisions their optimal entry gate.
-2. **Arrival**: As fans approach, their plan dynamically re-evaluates. If their recommended gate swells, they are intelligently nudged toward an adjacent, underutilized gate.
-3. **During Event**: The Control Room monitors live density (simulated/reported). If the South Stand food courts get saturated, targeted "Smart Nudges" are pushed strictly to fans in adjacent zones offering them incentives to visit under-loaded vendors elsewhere.
-4. **Exit Flow**: Rather than a simultaneous 132,000-person exit, attendees are offered tiered exit recommendations (Leave Now, Wait 15 Mins, Stay for Post-Game Ceremony) to sequentially bleed pressure off Metro lines.
-5. **Post-Event**: Attendees file a $<10$ second visual feedback form to tune the ML model for the next match.
+1. **Pre-Event** — Ticket holders open the PWA link from SMS
+   and complete a 30-second intake: arrival time, group size,
+   transport mode, parking zone, post-match destination. The
+   system builds their personal venue plan instantly.
+2. **Arrival** — App shows recommended gate with live density
+   reason. Step-by-step escort navigation guides them to their
+   seat one instruction at a time.
+3. **During Match** — Smart nudges surface 5 minutes before
+   innings break. Control Room monitors density. Staff report
+   ground truth. Attendees receive gentle rerouting suggestions,
+   never alarming commands.
+4. **Exit** — App surfaces exit plan 20 minutes before match
+   end with three timed options: Leave Now, Wait 15 Min, Stay
+   for Presentation. Crowd exits in waves, not a simultaneous
+   stampede.
+5. **Post-Match** — 3-question feedback form improves
+   predictions for next match.
+
+## Demo Instructions (5-Minute Path)
+Open three browser windows simultaneously:
+
+**Window 1 — Desktop:**
+https://studio-5460981965-b6a76.web.app/control
+
+**Window 2 — Mobile viewport (F12 → phone icon):**
+https://studio-5460981965-b6a76.web.app/staff
+
+**Window 3 — Mobile viewport:**
+https://studio-5460981965-b6a76.web.app/
+
+**Demo Flow:**
+1. Control Room → scrub timeline forward → Zone N3 turns red
+2. Staff → Login: ID `123`, Zone `N3 North` → zone shows red
+3. Control Room → click N3 → dispatch: "Redirect to Gate 11"
+4. Staff → instruction appears instantly → tap ✓ Acknowledged
+5. Control Room → acknowledgment registers in real-time
+6. Staff → tap "🔴 MY ZONE IS CROWDED" toggle
+7. Attendee → complete intake → view personal plan
+8. Attendee → switch language English ↔ Hindi mid-session
+9. Attendee → receive nudge from control room
 
 ## Assumptions Made
-- **Simulation**: Live crowd flow data in this prototype is simulated (driven by the Control Room scrubber modeling a 500-attendee test load).
-- **Positioning**: Indoor positioning is assumed via zone-based proxy (user self-selection/ticket zone) rather than highly granular hardware GPS/Beacon triangulation.
-- **Hardware**: We assume ground staff (stewards) carry moderately modern smartphones capable of running a modern web browser.
-- **Infrastructure**: Firebase's Spark (free) tier is assumed mathematically sufficient to handle the bandwidth of this localized prototype demonstration.
-
-## Demo Instructions
-*(Ensure your testing environment permits multiple browser windows)*
-
-1. **Attendee**: Open exactly one mobile-sized viewport to `https://studio-5460981965-b6a76.web.app/` (or `localhost:3000/`)
-2. **Staff**: Open a mobile-sized viewport to `https://studio-5460981965-b6a76.web.app/staff`
-3. **Control Room**: Open a large desktop maximized window to `https://studio-5460981965-b6a76.web.app/control`
-4. **Demo Flow (5-Minute Path)**:
-   * **(Control)**: Scrub the simulation timeline forward to trigger a "Crowded" red alert in Zone N3.
-   * **(Staff)**: Login as Staff ID: \`123\`, Zone: \`N3 North\`. Notice the density overlay turns red.
-   * **(Control)**: Click the flashing N3 zone and dispatch a custom instruction: *"Redirect crowd to Gate 11"*.
-   * **(Staff)**: Verify the instruction pops up immediately. Click `✓ Acknowledged`. Watch the Control Room dynamically register the acknowledgment checkmark.
-   * **(Staff)**: Tap the massive "🔴 MY ZONE IS CROWDED" toggle. 
-   * **(Attendee)**: Complete the intake flow to reach your personalized plan. Push the global language toggle to exactly swap between English and Hindi mid-session, verifying instant i18n triggers without tearing the UI.
+- Crowd data is simulated (500-attendee model, Control Room
+  scrubber controls timeline)
+- Indoor positioning is zone-based proxy (ticket section),
+  not GPS/BLE hardware
+- Ground staff carry modern smartphones with browser access
+- Firebase Spark free tier is sufficient for prototype demo
 
 ## Local Setup
+1. Clone: `git clone https://github.com/chparam612/Event_flow.git`
+2. Install: `npm install`
+3. Run: `node server.js`
+4. Open: `http://localhost:3000`
 
-1. **Clone the repository**:
-   \`\`\`bash
-   git clone https://github.com/chparam612/Event_flow.git
-   cd Event_flow
-   \`\`\`
-2. **Install Dependencies**:
-   \`\`\`bash
-   npm install
-   \`\`\`
-3. **Google Maps Setup**:
-   In `index.html`, the Google Maps API is 
-   pre-configured for the live demo. For local 
-   development, replace the Maps API key in 
-   `index.html` with your own key from 
-   [Google Cloud Console](https://console.cloud.google.com).
-   The app includes a built-in SVG venue map 
-   as fallback — it works without this step.
-4. **Run Local Server**:
-   \`\`\`bash
-   node server.js
-   \`\`\`
-   Access the app securely at \`http://localhost:3000\`.
+The app works without API keys (SVG map fallback included).
+For Google Maps, add your key to index.html Maps script tag.
 
-## Future Roadmap
-- **Optical AI Integration**: Wire physical high-Vantage CCTV camera feeds directly into Google Cloud Vision API to derive objective frame-by-frame density heatmaps, replacing steward polling.
-- **Hardware Beacons (BLE)**: Layer rigorous Bluetooth Low-Energy beacons across NMS for precise micro-positioning within massive dense concrete shells where GPS drops.
-- **AR Wayfinding**: Transition the 2D escort paths into Augmented Reality step-by-step guides using device gyroscope data.
-- **Language Expansion**: Sub-dialect scaling for localized vernaculars using Google Vertex AI.
 ## Running Tests
-`ash
+```bash
 npm test
-``n
+```
+
 ## Accessibility
 - WCAG 2.1 AA compliant color contrast
 - Screen reader compatible with ARIA labels
 - Keyboard navigable
 - 5 language support for diverse users
+
+## Future Roadmap
+- **Google Cloud Vision API** — Wire CCTV feeds for real
+  frame-by-frame density detection replacing steward polling
+- **BLE Beacon Network** — Precise indoor positioning across
+  NMS concrete structure where GPS fails
+- **AR Wayfinding** — Step-by-step escort via device camera
+  using gyroscope data
+- **Google Vertex AI** — Sub-dialect language expansion for
+  regional vernaculars beyond the current 5 languages
+- **Predictive ML** — Post-match feedback loop trains model
+  for next-match accuracy improvement
+
+---
+*Built for Google Prompt Wars 2026 using Google AntiGravity IDE*
+*Narendra Modi Stadium, Ahmedabad — 132,000 capacity*
