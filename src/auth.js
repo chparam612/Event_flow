@@ -49,15 +49,31 @@ export async function loginWithEmail(email, password) {
 
 /* ─── Anonymous Login (for Attendees) ───────────────── */
 export async function loginAsAttendee() {
+  // Dynamic import to avoid module issues
+  const { signInAnonymously, getAuth } = 
+    await import(
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js'
+    );
+  
+  const auth = getAuth();
+  
   try {
     const result = await signInAnonymously(auth);
     localStorage.setItem('eventflow_role', 'attendee');
     localStorage.setItem('eventflow_uid', result.user.uid);
-    console.log('Anonymous login success:', result.user.uid);
+    console.log('✅ Anonymous login:', result.user.uid);
     return result.user;
   } catch (error) {
-    console.error('Anonymous login failed:', error);
-    throw error;
+    console.error('❌ Anonymous login error:', error.code, error.message);
+    
+    // If anonymous disabled — show helpful error
+    if (error.code === 'auth/operation-not-allowed') {
+      alert('Please enable Anonymous auth in Firebase Console:\n' +
+        'Authentication → Sign-in method → Anonymous → Enable');
+    }
+    
+    // Do NOT block user — let them through anyway
+    return null;
   }
 }
 

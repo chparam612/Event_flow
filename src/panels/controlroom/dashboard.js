@@ -155,7 +155,7 @@ export function renderControl() {
         '<div class="cr-header-right">' +
             '<div class="cr-header-stat" id="cr-header-count">— inside</div>' +
             '<div class="cr-time-box"><span class="cr-sim-time" id="cr-sim-time">18:00</span></div>' +
-            '<button id="cr-logout-btn" onclick="window.efLogout()" aria-label="Logout from Control Room" style="background:transparent;border:1px solid #333;color:#555;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.78rem;margin-left:12px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor=\'#ff4d4d\';this.style.color=\'#ff4d4d\'" onmouseout="this.style.borderColor=\'#333\';this.style.color=\'#555\'">Logout</button>' +
+            '<button id="cr-logout-btn" aria-label="Logout from Control Room" style="background:transparent;border:1px solid #333;color:#555;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.78rem;margin-left:12px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor=\'#ff4d4d\';this.style.color=\'#ff4d4d\'" onmouseout="this.style.borderColor=\'#333\';this.style.color=\'#555\'">Logout</button>' +
         '</div>' +
     '</header>' +
 
@@ -224,9 +224,51 @@ export function renderControl() {
 
 /* ─── Init ───────────────────────────────────────────────────── */
 export function initControl() {
+    // Prevent back navigation getting stuck
+    window.addEventListener('popstate', (e) => {
+        e.preventDefault();
+        import('/src/auth.js').then(({ getCurrentUser }) => {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = '/control-login';
+            }
+        });
+    });
+    // Also disable browser back from control room
+    history.pushState(null, null, window.location.href);
+
     const densities = getZoneDensity();
 
-    // Initial renders
+    // ... rest of initialization ...
+    const logoutBtn = document.getElementById('cr-logout-btn');
+    if (logoutBtn) {
+        // Remove old listeners by cloning
+        const newBtn = logoutBtn.cloneNode(true);
+        logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
+        
+        newBtn.addEventListener('click', async () => {
+            newBtn.textContent = 'Logging out...';
+            newBtn.disabled = true;
+            
+            try {
+                const { auth } = await import('/src/firebase.js');
+                const { signOut, getAuth } = await import(
+                    'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js'
+                );
+                const fireAuth = getAuth();
+                await signOut(fireAuth);
+            } catch(e) {
+                console.log('SignOut error (continuing):', e);
+            } finally {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.replace('/');
+            }
+        });
+        console.log('✅ Logout button fixed');
+    }
+
+    // Existing event bindings...
     refreshMap(densities);
     refreshStaffList(densities);
     refreshAlerts(densities);

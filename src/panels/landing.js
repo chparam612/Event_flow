@@ -143,26 +143,34 @@ export function initLanding() {
     };
 
     // ── Fan Button: Anonymous Auth → /attendee ─────────────────
-    const attendeeBtn = document.getElementById('btn-fan');
-    if (attendeeBtn) {
-        attendeeBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            // Show loading state
-            attendeeBtn.textContent = 'Setting up...';
-            attendeeBtn.disabled = true;
+    const fanBtn = document.querySelector(
+        '[data-role="attendee"], #btn-fan, .attendee-btn'
+    );
+
+    if (fanBtn) {
+        fanBtn.addEventListener('click', async () => {
+            const originalText = fanBtn.textContent;
+            fanBtn.textContent = '⏳ Setting up...';
+            fanBtn.disabled = true;
             
             try {
+                const { loginAsAttendee } = await import('/src/auth.js');
                 await loginAsAttendee();
-                navigate('/attendee');
-            } catch (error) {
-                attendeeBtn.textContent = 'Enter as Fan';
-                attendeeBtn.disabled = false;
-                console.error('Could not start session:', error);
-                // Still navigate even if anonymous auth fails
-                // So user experience is not broken
-                navigate('/attendee');
+                console.log('✅ Fan login done, navigating...');
+            } catch(e) {
+                console.log('Anonymous failed, continuing anyway');
+            } finally {
+                // Always navigate — even if auth failed
+                fanBtn.textContent = originalText;
+                fanBtn.disabled = false;
+                // Navigate to attendee
+                window.history.pushState({}, '', '/attendee');
+                window.dispatchEvent(new PopStateEvent('popstate'));
             }
         });
+        console.log('✅ Fan button handler attached');
+    } else {
+        console.error('❌ Fan button not found in landing page');
     }
 
     // ── Staff Button ────────────────────────────────────────────

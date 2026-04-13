@@ -187,13 +187,38 @@ export function initStaff() {
         }, 600); // simulate network delay for UX
     });
 
-    // Logout — calls Firebase signOut + redirects to /
-    app.querySelector('#logout-btn')?.addEventListener('click', async () => {
-        if (session) {
-            writeStaff(session.staffId, { zoneId: session.zone, status: 'clear', online: false });
-        }
-        await logout(); // clears storage + redirects to /
-    });
+    // Logout — robust version
+    const staffLogoutBtn = app.querySelector('#logout-btn');
+    if (staffLogoutBtn) {
+        // Remove old listeners by cloning
+        const newBtn = staffLogoutBtn.cloneNode(true);
+        staffLogoutBtn.parentNode.replaceChild(newBtn, staffLogoutBtn);
+
+        newBtn.addEventListener('click', async () => {
+            newBtn.textContent = 'Logging out...';
+            newBtn.disabled = true;
+            
+            if (session) {
+                writeStaff(session.staffId, { zoneId: session.zone, status: 'clear', online: false });
+            }
+
+            try {
+                const { auth } = await import('/src/firebase.js');
+                const { signOut, getAuth } = await import(
+                    'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js'
+                );
+                const fireAuth = getAuth();
+                await signOut(fireAuth);
+            } catch(e) {
+                console.log('SignOut error (continuing):', e);
+            } finally {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.replace('/');
+            }
+        });
+        console.log('✅ Staff logout fixed');
+    }
 
 
     // Status toggles
