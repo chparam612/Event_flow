@@ -8,127 +8,89 @@ import { loginAsAttendee } from '/src/auth.js';
 
 export function renderLanding() {
     return `
+export function renderLanding() {
+    return `
     <div id="landing-root" style="
         min-height: 100vh;
-        background: #080C14;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 32px 20px;
-        box-sizing: border-box;
-        font-family: 'Inter', -apple-system, sans-serif;
+        padding: 40px 20px;
+        position: relative;
     ">
-        <!-- Header -->
-        <div style="text-align:center; margin-bottom:40px;">
-            <div style="
-                font-size: 2.4rem;
+        <!-- Background Ambient Glow -->
+        <div style="position:fixed; top:20%; left:10%; width:300px; height:300px; background:var(--primary-glow); filter:blur(100px); opacity:0.1; pointer-events:none;"></div>
+        <div style="position:fixed; bottom:20%; right:10%; width:300px; height:300px; background:var(--secondary-color); filter:blur(100px); opacity:0.1; pointer-events:none;"></div>
+
+        <!-- Header Section -->
+        <div style="text-align:center; margin-bottom:60px; animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div class="glow-text" style="
+                font-size: 3.5rem;
                 font-weight: 900;
-                letter-spacing: -1.5px;
-                background: linear-gradient(135deg, #00C49A 0%, #00e5b4 100%);
+                letter-spacing: -2px;
+                background: linear-gradient(135deg, var(--primary-color) 0%, #fff 100%);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
-                background-clip: text;
-                margin-bottom: 8px;
+                margin-bottom: 12px;
             ">EventFlow</div>
-            <div style="font-size:0.88rem; color:#3a4560; font-weight:500; letter-spacing:0.4px;">
-                Narendra Modi Stadium — Smart Crowd Management
-            </div>
-            <div style="margin-top:14px; display:flex; align-items:center; justify-content:center; gap:7px;">
-                <span style="width:7px;height:7px;border-radius:50%;background:#00C49A;
-                    display:inline-block;animation:ef-pulse 2s infinite;"></span>
-                <span style="font-size:0.72rem; color:#2a3550;">Live System Active</span>
+            <p style="font-size:1rem; color:var(--text-secondary); font-weight:500; letter-spacing:1px; text-transform:uppercase;">
+                NMS Ahmedabad &bull; Smart Crowd Management
+            </p>
+            <div style="margin-top:20px; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <span class="dot pulse" style="background:var(--primary-color);"></span>
+                <span style="font-size:0.8rem; color:var(--primary-color); font-weight:700; letter-spacing:1.5px;">SYSTEM LIVE</span>
             </div>
         </div>
 
-        <!-- Role Cards -->
-        <div style="width:100%; max-width:400px; display:flex; flex-direction:column; gap:14px;">
+        <!-- Role Selection Grid -->
+        <div style="width:100%; max-width:440px; display:flex; flex-direction:column; gap:20px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;">
 
-            <!-- CARD 1: Fan/Attendee -->
-            <div class="ef-card" style="
-                background: rgba(0,196,154,0.08);
-                border: 1px solid rgba(0,196,154,0.4);
-                border-radius: 18px; padding: 22px 20px;
-                cursor: pointer;
-                display: flex; align-items: center; gap: 16px;
-                transition: transform 0.18s, box-shadow 0.18s;
-            ">
-                <span style="font-size:2.8rem; flex-shrink:0; line-height:1;">🎟️</span>
+            <!-- CARD: Fan -->
+            <div class="premium-card glass role-card" id="card-fan" style="padding: 24px; cursor: pointer; display: flex; align-items: center; gap: 20px;">
+                <div class="icon-wrap" style="width:64px; height:64px; background:rgba(0,229,180,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2rem;">🎟️</div>
                 <div style="flex:1;">
-                    <div style="font-size:1.05rem; font-weight:700; color:#e8f5f1; margin-bottom:3px;" data-i18n="landing.attendee_title">Match Attendee</div>
-                    <div style="font-size:0.8rem; color:#3a5a50;" data-i18n="landing.attendee_sub">Get your personal crowd-free plan</div>
+                    <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:4px;" data-i18n="landing.attendee_title">Match Attendee</h3>
+                    <p style="font-size:0.85rem; color:var(--text-secondary);" data-i18n="landing.attendee_sub">Personalized crowd-free route</p>
                 </div>
-                <button id="btn-fan" aria-label="Enter as Fan" style="
-                    background: rgba(0,196,154,0.2);
-                    border: 1px solid rgba(0,196,154,0.5);
-                    color: #00C49A; padding: 9px 14px;
-                    border-radius: 10px; font-size: 0.78rem;
-                    font-weight: 700; cursor: pointer; white-space: nowrap;
-                    transition: background 0.15s; min-width: 90px;
-                " data-i18n="landing.attendee_btn">Enter as Fan</button>
+                <div style="color:var(--primary-color); font-weight:800; font-size:1.2rem;">&rarr;</div>
             </div>
 
-            <!-- CARD 2: Ground Staff -->
-            <div class="ef-card" style="
-                background: rgba(255,107,53,0.08);
-                border: 1px solid rgba(255,107,53,0.4);
-                border-radius: 18px; padding: 22px 20px;
-                cursor: pointer;
-                display: flex; align-items: center; gap: 16px;
-                transition: transform 0.18s, box-shadow 0.18s;
-            ">
-                <span style="font-size:2.8rem; flex-shrink:0; line-height:1;">🧑‍✈️</span>
+            <!-- CARD: Staff -->
+            <div class="premium-card glass role-card" id="card-staff" style="padding: 24px; cursor: pointer; display: flex; align-items: center; gap: 20px;">
+                <div class="icon-wrap" style="width:64px; height:64px; background:rgba(255,107,53,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2rem;">🧑‍✈️</div>
                 <div style="flex:1;">
-                    <div style="font-size:1.05rem; font-weight:700; color:#f5e8e0; margin-bottom:3px;" data-i18n="landing.staff_title">Ground Staff</div>
-                    <div style="font-size:0.8rem; color:#5a3520;" data-i18n="landing.staff_sub">Zone reporting &amp; live instructions</div>
+                    <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:4px;" data-i18n="landing.staff_title">Ground Staff</h3>
+                    <p style="font-size:0.85rem; color:var(--text-secondary);" data-i18n="landing.staff_sub">Zone reporting & local management</p>
                 </div>
-                <button id="btn-staff" aria-label="Staff Login" style="
-                    background: rgba(255,107,53,0.2);
-                    border: 1px solid rgba(255,107,53,0.5);
-                    color: #ff6b35; padding: 9px 14px;
-                    border-radius: 10px; font-size: 0.78rem;
-                    font-weight: 700; cursor: pointer; white-space: nowrap;
-                    transition: background 0.15s; min-width: 90px;
-                " data-i18n="landing.staff_btn">Staff Login</button>
+                <div style="color:var(--warning-color); font-weight:800; font-size:1.2rem;">&rarr;</div>
             </div>
 
-            <!-- CARD 3: Control Room -->
-            <div class="ef-card" style="
-                background: rgba(123,47,255,0.08);
-                border: 1px solid rgba(123,47,255,0.4);
-                border-radius: 18px; padding: 22px 20px;
-                cursor: pointer;
-                display: flex; align-items: center; gap: 16px;
-                transition: transform 0.18s, box-shadow 0.18s;
-            ">
-                <span style="font-size:2.8rem; flex-shrink:0; line-height:1;">🖥️</span>
+            <!-- CARD: Control -->
+            <div class="premium-card glass role-card" id="card-control" style="padding: 24px; cursor: pointer; display: flex; align-items: center; gap: 20px;">
+                <div class="icon-wrap" style="width:64px; height:64px; background:rgba(123,47,255,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2rem;">🖥️</div>
                 <div style="flex:1;">
-                    <div style="font-size:1.05rem; font-weight:700; color:#e8e0f5; margin-bottom:3px;" data-i18n="landing.control_title">Control Room</div>
-                    <div style="font-size:0.8rem; color:#3a2060;" data-i18n="landing.control_sub">Command center — authorized only</div>
+                    <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:4px;" data-i18n="landing.control_title">Control Room</h3>
+                    <p style="font-size:0.85rem; color:var(--text-secondary);" data-i18n="landing.control_sub">Command center & analytics</p>
                 </div>
-                <button id="btn-control" aria-label="Control Login" style="
-                    background: rgba(123,47,255,0.2);
-                    border: 1px solid rgba(123,47,255,0.5);
-                    color: #9b6fff; padding: 9px 14px;
-                    border-radius: 10px; font-size: 0.78rem;
-                    font-weight: 700; cursor: pointer; white-space: nowrap;
-                    transition: background 0.15s; min-width: 90px;
-                " data-i18n="landing.control_btn">Control Login</button>
+                <div style="color:var(--accent-color); font-weight:800; font-size:1.2rem;">&rarr;</div>
             </div>
 
         </div>
 
         <!-- Footer -->
-        <div style="margin-top:40px; font-size:0.68rem; color:#1a2030; text-align:center; letter-spacing:0.5px;">
-            EventFlow v2.0 — Google Prompt Wars 2026
-        </div>
+        <footer style="margin-top:60px; text-align:center; opacity:0.5; font-size:0.75rem; letter-spacing:2px; font-weight:600;">
+            EVENTFLOW &bull; STADIUM V2.0
+        </footer>
 
         <style>
-            @keyframes ef-pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.3;transform:scale(0.7);} }
-            .ef-card:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.5); }
-            .ef-card:active { transform:scale(0.98); }
+            @keyframes slideDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+            @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+            .role-card:hover .icon-wrap { transform: scale(1.1) rotate(-5deg); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         </style>
     </div>`;
+}
+`;
 }
 
 export function initLanding() {
