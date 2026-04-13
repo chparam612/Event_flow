@@ -187,37 +187,28 @@ export function initStaff() {
         }, 600); // simulate network delay for UX
     });
 
-    // Logout — robust version
-    const staffLogoutBtn = app.querySelector('#logout-btn');
-    if (staffLogoutBtn) {
-        // Remove old listeners by cloning
-        const newBtn = staffLogoutBtn.cloneNode(true);
-        staffLogoutBtn.parentNode.replaceChild(newBtn, staffLogoutBtn);
-
-        newBtn.addEventListener('click', async () => {
-            newBtn.textContent = 'Logging out...';
-            newBtn.disabled = true;
-            
-            if (session) {
-                writeStaff(session.staffId, { zoneId: session.zone, status: 'clear', online: false });
-            }
-
-            try {
-                const { auth: fireAuth } = await import('/src/firebase.js');
-                const { signOut } = await import(
-                    'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-                );
-                if (fireAuth) await signOut(fireAuth);
-            } catch(e) {
-                console.log('SignOut error (continuing):', e);
-            } finally {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.replace('/');
-            }
+    function attachStaffLogout() {
+        const btn = document.querySelector(
+            '#staff-logout-btn, .logout-btn, ' +
+            'button[aria-label*="logout"], ' +
+            'button[aria-label*="Logout"]'
+        ) || Array.from(document.querySelectorAll('button'))
+             .find(b => b.textContent.includes('Logout') || 
+                        b.textContent.includes('logout'));
+        
+        if (!btn) {
+            setTimeout(attachStaffLogout, 200);
+            return;
+        }
+        console.log('✅ Staff logout btn found');
+        btn.addEventListener('click', async () => {
+            btn.textContent = 'Logging out...';
+            btn.disabled = true;
+            const { logout } = await import('/src/auth.js');
+            await logout();
         });
-        console.log('✅ Staff logout fixed');
     }
+    setTimeout(attachStaffLogout, 300);
 
 
     // Status toggles

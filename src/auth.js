@@ -1,22 +1,20 @@
 /**
- * EventFlow — Auth Module v2
- * Firebase Email/Password + Anonymous Authentication
+ * EventFlow — Auth Module v3
+ * Single Firebase version — no conflicts
  */
 import {
     signInWithEmailAndPassword,
     signInAnonymously,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    getAuth
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { auth } from '/src/firebase.js';
 
-/* ─── Wait for Firebase Auth to Initialize ──────────── */
-// Firebase takes ~300-600ms to restore session from IndexedDB.
-// Always await this before any auth check!
+/* ─── Wait for Auth Ready ────────────────────────────── */
 export function waitForAuthReady() {
     return new Promise((resolve) => {
         if (!auth) { resolve(null); return; }
-        // onAuthStateChanged fires once immediately with current user (or null)
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             unsubscribe();
             resolve(user);
@@ -24,82 +22,79 @@ export function waitForAuthReady() {
     });
 }
 
+/* ─── Get Current User (async — waits for init) ─────── */
+export async function getCurrentUser() {
+    return await waitForAuthReady();
+}
+
 /* ─── Email/Password Login ───────────────────────────── */
 export async function loginWithEmail(email, password) {
     try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(
+            auth, email, password
+        );
         return cred.user;
     } catch (error) {
         switch (error.code) {
             case 'auth/user-not-found':
             case 'auth/wrong-password':
             case 'auth/invalid-credential':
-                throw new Error('Invalid email or password. Please check credentials.');
+                throw new Error(
+                    'Invalid email or password.'
+                );
             case 'auth/too-many-requests':
-                throw new Error('Too many failed attempts. Please wait and try again.');
+                throw new Error(
+                    'Too many attempts. Wait and retry.'
+                );
             case 'auth/network-request-failed':
-                throw new Error('Network error. Please check your connection.');
-            case 'auth/user-disabled':
-                throw new Error('This account has been disabled. Contact admin.');
+                throw new Error(
+                    'Network error. Check connection.'
+                );
             default:
-                throw new Error('Login failed: ' + (error.message || 'Unknown error'));
+                throw new Error(
+                    'Login failed: ' + (error.message || 'Unknown')
+                );
         }
     }
 }
 
-/* ─── Anonymous Login (for Attendees) ───────────────── */
+/* ─── Anonymous Login (Attendees) ───────────────────── */
 export async function loginAsAttendee() {
-  // Dynamic import to avoid module issues
-  const { signInAnonymously, getAuth } = 
-    await import(
-      'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js'
-    );
-  
-  const auth = getAuth();
-  
-  try {
-    const result = await signInAnonymously(auth);
-    localStorage.setItem('eventflow_role', 'attendee');
-    localStorage.setItem('eventflow_uid', result.user.uid);
-    console.log('✅ Anonymous login:', result.user.uid);
-    return result.user;
-  } catch (error) {
-    console.error('❌ Anonymous login error:', error.code, error.message);
-    
-    // If anonymous disabled — show helpful error
-    if (error.code === 'auth/operation-not-allowed') {
-      alert('Please enable Anonymous auth in Firebase Console:\n' +
-        'Authentication → Sign-in method → Anonymous → Enable');
+    try {
+        const result = await signInAnonymously(auth);
+        localStorage.setItem('eventflow_role', 'attendee');
+        localStorage.setItem('eventflow_uid', result.user.uid);
+        console.log('✅ Anonymous login:', result.user.uid);
+        return result.user;
+    } catch (error) {
+        console.error('❌ Anon login error:', 
+            error.code, error.message);
+        if (error.code === 'auth/operation-not-allowed') {
+            console.error('Enable Anonymous auth in Firebase Console');
+        }
+        return null;
     }
-    
-    // Do NOT block user — let them through anyway
-    return null;
-  }
 }
 
 /* ─── Logout ─────────────────────────────────────────── */
 export async function logout() {
-  console.log('Logout called');
-  try {
-    await signOut(auth);
-  } catch (e) {
-    console.error('Logout error:', e);
-  } finally {
-    // Clear all stored data
-    sessionStorage.clear();
-    localStorage.removeItem('eventflow_zone');
-    localStorage.removeItem('eventflow_role');
-    localStorage.removeItem('eventflow_uid');
-    // Hard redirect to landing page
-    window.location.href = '/';
-  }
+    console.log('🔴 Logout called');
+    try {
+        await signOut(auth);
+        console.log('✅ Firebase signOut done');
+    } catch (e) {
+        console.warn('SignOut error:', e.message);
+    }
+    // Clear all storage
+    try { localStorage.clear(); } catch(e) {}
+    try { sessionStorage.clear(); } catch(e) {}
+    console.log('✅ Redirecting to /');
+    // Replace so user cannot go back
+    window.location.replace('/');
 }
-window.efLogout = logout;
 
-/* ─── Get Current User (sync) ────────────────────────── */
-export function getCurrentUser() {
-    return auth ? auth.currentUser : null;
-}
+// Global fallback
+window.efLogout = logout;
 
 /* ─── Auth State Listener ────────────────────────────── */
 export function onAuthChange(callback) {
@@ -110,14 +105,14 @@ export function onAuthChange(callback) {
 
 /* ─── Role Checks ────────────────────────────────────── */
 export function isStaff(user) {
-    const u = user || getCurrentUser();
+    const u = user || (auth && auth.currentUser);
     return u && u.email && u.email.includes('staff');
 }
 export function isControl(user) {
-    const u = user || getCurrentUser();
+    const u = user || (auth && auth.currentUser);
     return u && u.email && u.email.includes('control');
 }
 export function isAttendee(user) {
-    const u = user || getCurrentUser();
+    const u = user || (auth && auth.currentUser);
     return u && u.isAnonymous;
 }

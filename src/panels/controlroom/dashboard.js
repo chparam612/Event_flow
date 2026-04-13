@@ -225,13 +225,13 @@ export function renderControl() {
 /* ─── Init ───────────────────────────────────────────────────── */
 export function initControl() {
     // Prevent back navigation getting stuck
-    window.addEventListener('popstate', (e) => {
-        e.preventDefault();
+    window.addEventListener('popstate', () => {
         import('/src/auth.js').then(({ getCurrentUser }) => {
-            const user = getCurrentUser();
-            if (!user) {
-                window.location.href = '/control-login';
-            }
+            getCurrentUser().then(user => {
+                if (!user) {
+                    window.location.replace('/control-login');
+                }
+            });
         });
     });
     // Also disable browser back from control room
@@ -240,32 +240,23 @@ export function initControl() {
     const densities = getZoneDensity();
 
     // ... rest of initialization ...
-    const logoutBtn = document.getElementById('cr-logout-btn');
-    if (logoutBtn) {
-        // Remove old listeners by cloning
-        const newBtn = logoutBtn.cloneNode(true);
-        logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
-        
-        newBtn.addEventListener('click', async () => {
-            newBtn.textContent = 'Logging out...';
-            newBtn.disabled = true;
-            
-            try {
-                const { auth: fireAuth } = await import('/src/firebase.js');
-                const { signOut } = await import(
-                    'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-                );
-                if (fireAuth) await signOut(fireAuth);
-            } catch(e) {
-                console.log('SignOut error (continuing):', e);
-            } finally {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.replace('/');
-            }
+    // Wait for DOM then attach logout
+    function attachLogout() {
+        const btn = document.getElementById('cr-logout-btn');
+        if (!btn) {
+            setTimeout(attachLogout, 200);
+            return;
+        }
+        console.log('✅ Logout btn found');
+        btn.addEventListener('click', async () => {
+            console.log('🔴 Logout clicked');
+            btn.textContent = 'Logging out...';
+            btn.disabled = true;
+            const { logout } = await import('/src/auth.js');
+            await logout();
         });
-        console.log('✅ Logout button fixed');
     }
+    setTimeout(attachLogout, 300);
 
     // Existing event bindings...
     refreshMap(densities);
