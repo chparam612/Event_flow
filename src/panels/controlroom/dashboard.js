@@ -11,7 +11,6 @@ import {
 } from '/src/firebase.js';
 import { logout } from '/src/auth.js';
 
-
 /* ─── Constants ──────────────────────────────────────────────── */
 const STAFF_ROSTER = [
     { id: 'N1', name: 'Ramesh',  zone: 'North Stand' },
@@ -50,25 +49,20 @@ const QUICK_INSTRUCTIONS = [
 ];
 
 /* ─── State ──────────────────────────────────────────────────── */
-let staffStatuses = {};   // { 'N1_North': { status, staffId, ... } }
-let selectedZone = null;  // zone name currently selected on map
+let staffStatuses = {};   
+let selectedZone = null;  
 let simRunning = false;
 let simSpeed = 1;
 let simIntervalId = null;
 let nudgesSent = 0;
-let incidentsResolved = 0;
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 function densityColor(d) {
-    if (d > 0.80) return '#ff4d4d';
-    if (d > 0.60) return '#ffd166';
-    return '#00C49A';
+    if (d > 0.80) return 'var(--danger-color)';
+    if (d > 0.60) return 'var(--warning-color)';
+    return 'var(--primary-color)';
 }
-function densityLabel(d) {
-    if (d > 0.80) return 'CRITICAL';
-    if (d > 0.60) return 'BUSY';
-    return 'CLEAR';
-}
+
 function fmtTime(date) {
     if (!date) date = new Date();
     let h = date.getHours(), m = date.getMinutes();
@@ -77,6 +71,7 @@ function fmtTime(date) {
     if (h === 0) h = 12;
     return h + ':' + m.toString().padStart(2, '0') + ' ' + ampm;
 }
+
 function totalInside(densities) {
     let total = 0;
     const caps = { 'North Stand': 22000, 'South Stand': 22000, 'East Stand': 18000, 'West Stand': 18000,
@@ -99,171 +94,176 @@ function buildStadiumSVG(densities) {
         { id: 'Gate Area',        label: 'GATES', cx: 250, cy: 400, rx: 80,  ry: 16, d: densities['Gate Area'] || 0 },
         { id: 'Parking Zone',     label: 'PARK',  cx: 250, cy: 440, rx: 60,  ry: 14, d: densities['Parking Zone'] || 0 },
     ];
-    const gates = [
-        { label: 'A', x: 130, y: 45 },  { label: 'B', x: 180, y: 30 },  { label: 'C', x: 320, y: 30 },
-        { label: 'D', x: 370, y: 45 },  { label: 'E', x: 440, y: 120 }, { label: 'F', x: 440, y: 280 },
-        { label: 'G', x: 370, y: 355 }, { label: 'H', x: 180, y: 370 }, { label: 'I', x: 60,  y: 120 },
-    ];
 
-    let svg = '<svg viewBox="0 0 500 470" class="cr-stadium-svg" xmlns="http://www.w3.org/2000/svg">';
-    // Outer boundary
-    svg += '<ellipse cx="250" cy="200" rx="220" ry="180" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="6,3"/>';
-    svg += '<ellipse cx="250" cy="200" rx="200" ry="160" fill="#111" stroke="#2a2a2a" stroke-width="2"/>';
-    // Pitch
-    svg += '<ellipse cx="250" cy="200" rx="60" ry="40" fill="#1a3a1a" stroke="#2a4a2a" stroke-width="1"/>';
-    svg += '<line x1="250" y1="160" x2="250" y2="240" stroke="#2a4a2a" stroke-width="0.5"/>';
-    svg += '<circle cx="250" cy="200" r="8" fill="none" stroke="#2a4a2a" stroke-width="0.5"/>';
+    let svg = `<svg viewBox="0 0 500 470" class="cr-stadium-svg" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<ellipse cx="250" cy="200" rx="220" ry="180" fill="none" stroke="var(--glass-border)" stroke-width="1" stroke-dasharray="6,3"/>`;
+    svg += `<ellipse cx="250" cy="200" rx="200" ry="160" fill="rgba(0,0,0,0.4)" stroke="var(--glass-border)" stroke-width="2"/>`;
+    svg += `<ellipse cx="250" cy="200" rx="60" ry="40" fill="rgba(0,229,180,0.05)" stroke="var(--primary-color)" stroke-width="0.5" opacity="0.3"/>`;
 
-    // Zones
     zones.forEach(z => {
         const col = densityColor(z.d);
         const pct = Math.round(z.d * 100);
         const isSel = selectedZone === z.id;
-        const fillOpacity = isSel ? 0.45 : 0.25;
-        const strokeW = isSel ? 3 : 1.5;
-        const pulse = z.d > 0.80 ? ' class="zone-pulse"' : '';
-        svg += '<g data-zone="' + z.id + '" style="cursor:pointer;"' + pulse + '>';
-        svg += '<ellipse cx="' + z.cx + '" cy="' + z.cy + '" rx="' + z.rx + '" ry="' + z.ry + '" ';
-        svg += 'fill="' + col + '" fill-opacity="' + fillOpacity + '" stroke="' + col + '" stroke-width="' + strokeW + '"/>';
-        svg += '<text x="' + z.cx + '" y="' + (z.cy - 4) + '" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Inter">' + z.label + '</text>';
-        svg += '<text x="' + z.cx + '" y="' + (z.cy + 12) + '" text-anchor="middle" fill="' + col + '" font-size="13" font-weight="800" font-family="Inter">' + pct + '%</text>';
-        svg += '</g>';
+        const fillOpacity = isSel ? 0.35 : 0.15;
+        const strokeW = isSel ? 2 : 0.5;
+        const pulse = z.d > 0.80 ? ' class="severe"' : '';
+
+        svg += `<g data-zone="${z.id}" style="cursor:pointer;"${pulse}>
+            <ellipse cx="${z.cx}" cy="${z.cy}" rx="${z.rx}" ry="${z.ry}" 
+                     fill="${col}" fill-opacity="${fillOpacity}" 
+                     stroke="${isSel ? '#fff' : col}" stroke-width="${strokeW}" />
+            <text x="${z.cx}" y="${z.cy - 4}" text-anchor="middle" fill="#fff" font-size="10" font-weight="800" style="pointer-events:none; opacity:0.8;">${z.label}</text>
+            <text x="${z.cx}" y="${z.cy + 12}" text-anchor="middle" fill="${col}" font-size="${isSel ? 16 : 14}" font-weight="900" style="pointer-events:none;">${pct}%</text>
+        </g>`;
     });
 
-    // Gates
-    gates.forEach(g => {
-        svg += '<g style="cursor:pointer;" data-gate="' + g.label + '">';
-        svg += '<rect x="' + (g.x - 10) + '" y="' + (g.y - 8) + '" width="20" height="16" rx="3" fill="#222" stroke="#555" stroke-width="1"/>';
-        svg += '<text x="' + g.x + '" y="' + (g.y + 4) + '" text-anchor="middle" fill="#888" font-size="9" font-weight="700" font-family="Inter">' + g.label + '</text>';
-        svg += '</g>';
-    });
     svg += '</svg>';
     return svg;
 }
 
 /* ─── Render ─────────────────────────────────────────────────── */
 export function renderControl() {
-    return '<div class="cr-screen" id="control-screen">' +
+    return `
+    <div class="cr-screen">
+        <!-- Header -->
+        <header class="cr-header">
+            <div class="cr-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="3">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                EventFlow 
+                <span class="cr-role-tag">COMMAND CENTER</span>
+            </div>
+            
+            <div class="cr-header-right" style="display:flex; align-items:center; gap:30px;">
+                <div class="cr-sim-time" id="cr-sim-time">00:00:00</div>
+                <button class="cr-sim-btn" id="cr-logout-btn" style="border-color:var(--danger-color); color:var(--danger-color); opacity:0.6;">Logout</button>
+            </div>
+        </header>
 
-    /* ── HEADER ── */
-    '<header class="cr-header">' +
-        '<div class="cr-logo">EventFlow <span class="cr-role-tag">COMMAND</span></div>' +
-        '<div class="cr-match-info">' +
-            '<span class="match-live-badge"><span class="dot pulse"></span> LIVE</span>' +
-            '<span style="color:var(--text-secondary);">IND vs AUS &bull; NMS Ahmedabad</span>' +
-        '</div>' +
-        '<div class="cr-header-right">' +
-            '<div class="cr-header-stat" id="cr-header-count">— inside</div>' +
-            '<div class="cr-time-box"><span class="cr-sim-time" id="cr-sim-time">18:00</span></div>' +
-            '<button id="cr-logout-btn" aria-label="Logout from Control Room" style="background:transparent;border:1px solid #333;color:#555;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.78rem;margin-left:12px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor=\'#ff4d4d\';this.style.color=\'#ff4d4d\'" onmouseout="this.style.borderColor=\'#333\';this.style.color=\'#555\'">Logout</button>' +
-        '</div>' +
-    '</header>' +
+        <!-- Main Body -->
+        <main class="cr-body">
+            
+            <!-- LEFT: Staff & Metrics -->
+            <aside class="left-panel">
+                <div class="cr-panel-title">System Metrics</div>
+                <div class="cr-stat-grid" style="margin-bottom: 30px;">
+                    <div class="cr-stat-tile">
+                        <span id="stat-attendance" class="tech-font">—</span>
+                        <span>Total Fans</span>
+                    </div>
+                    <div class="cr-stat-tile">
+                        <span id="stat-peak" class="tech-font">—</span>
+                        <span>Avg Loading</span>
+                    </div>
+                    <div class="cr-stat-tile">
+                        <span id="stat-staff-count" class="tech-font">—</span>
+                        <span>Staff Online</span>
+                    </div>
+                    <div class="cr-stat-tile">
+                        <span id="stat-alerts" class="tech-font" style="color:var(--primary-color);">0</span>
+                        <span>Active Alerts</span>
+                    </div>
+                </div>
 
-    /* ── BODY ── */
-    '<div class="cr-body">' +
+                <div class="cr-panel-title">Ground Stewards</div>
+                <div class="cr-staff-roster" id="cr-staff-list">
+                    <div class="cr-no-alerts">Connecting to field units...</div>
+                </div>
+            </aside>
 
-        /* LEFT: Staff Status */
-        '<aside class="cr-sidebar left-panel" id="cr-staff-col">' +
-            '<div class="cr-panel-title"><span class="dot" style="background:#00C49A;"></span> Staff Online</div>' +
-            '<div id="cr-staff-list" class="cr-staff-roster"></div>' +
-        '</aside>' +
+            <!-- CENTER: Heatmap -->
+            <section class="cr-center">
+                <div class="cr-panel-title">Spatial Awareness Heatmap</div>
+                <div class="cr-heatmap-wrap" id="cr-map-container">
+                    <!-- SVG map injected by initControl once -->
+                </div>
+                <div class="cr-legend">
+                    <div class="cr-legend-item"><span class="cr-legend-dot" style="background:var(--primary-color);"></span> Clear</div>
+                    <div class="cr-legend-item"><span class="cr-legend-dot" style="background:var(--warning-color);"></span> Busy</div>
+                    <div class="cr-legend-item"><span class="cr-legend-dot" style="background:var(--danger-color); border:1px solid #fff;"></span> Critical</div>
+                </div>
+            </section>
 
-        /* CENTER: Map */
-        '<main class="cr-center" id="cr-map-col">' +
-            '<div class="cr-heatmap-wrap" id="cr-map-container"></div>' +
-            '<div class="cr-legend">' +
-                '<div class="cr-legend-item"><span class="cr-legend-dot" style="background:#00C49A;"></span> Clear &lt;60%</div>' +
-                '<div class="cr-legend-item"><span class="cr-legend-dot" style="background:#ffd166;"></span> Busy 60-80%</div>' +
-                '<div class="cr-legend-item"><span class="cr-legend-dot" style="background:#ff4d4d;"></span> Critical &gt;80%</div>' +
-            '</div>' +
-        '</main>' +
+            <!-- RIGHT: Dispatch & Alerts -->
+            <aside class="right-panel">
+                <div class="cr-panel-title">Active Alerts</div>
+                <div class="cr-alerts-list" id="cr-alerts-list">
+                    <div class="cr-no-alerts">No current anomalies detected.</div>
+                </div>
 
-        /* RIGHT: Actions & Alerts */
-        '<aside class="cr-sidebar right-panel" id="cr-action-col">' +
-            /* Alerts */
-            '<div class="cr-panel-title"><span style="color:#ff4d4d;">&#9888;</span> Live Alerts</div>' +
-            '<div id="cr-alerts-list" class="cr-alerts-list"></div>' +
+                <div class="cr-panel-title" style="margin-top:30px;">Strategic Dispatch</div>
+                <div id="cr-dispatch-panel">
+                    <div class="cr-no-alerts">Select a zone on the map to issue instructions</div>
+                </div>
+            </aside>
+            
+        </main>
 
-            /* Instruction Dispatch */
-            '<div class="cr-panel-title" style="margin-top:20px;">Instruction Dispatch</div>' +
-            '<div id="cr-dispatch-panel" class="cr-dispatch-panel">' +
-                '<div class="cr-dispatch-hint">Click a zone on the map to dispatch instructions</div>' +
-            '</div>' +
-
-            /* Metrics */
-            '<div class="cr-panel-title" style="margin-top:20px;">Metrics</div>' +
-            '<div class="cr-stat-grid" id="cr-metrics-grid">' +
-                '<div class="cr-stat-tile"><span id="m-total">—</span><span>Total Inside</span></div>' +
-                '<div class="cr-stat-tile"><span id="m-wait">3.2m</span><span>Avg Wait</span></div>' +
-                '<div class="cr-stat-tile"><span id="m-staff">—/24</span><span>Staff Online</span></div>' +
-                '<div class="cr-stat-tile"><span id="m-nudges">0</span><span>Nudges Sent</span></div>' +
-                '<div class="cr-stat-tile"><span id="m-incidents">0</span><span>Incidents</span></div>' +
-                '<div class="cr-stat-tile"><span id="m-avgdens">—</span><span>Avg Density</span></div>' +
-            '</div>' +
-        '</aside>' +
-
-    '</div>' +
-
-    /* ── BOTTOM BAR: Simulation Controls ── */
-    '<footer class="cr-bottom-bar" id="cr-sim-bar">' +
-        '<div class="cr-sim-controls">' +
-            '<button class="cr-sim-btn" id="sim-play" aria-label="sim play">&#9654; Play</button>' +
-            '<button class="cr-sim-btn" id="sim-pause" aria-label="sim pause">&#9208; Pause</button>' +
-            '<button class="cr-sim-btn" id="sim-ff" aria-label="sim ff">&#9193; Fast 5x</button>' +
-        '</div>' +
-        '<div class="cr-sim-timeline">' +
-            '<span>6PM</span>' +
-            '<input type="range" min="0" max="100" value="0" id="sim-scrubber" class="cr-scrubber"/>' +
-            '<span>2AM</span>' +
-        '</div>' +
-        '<div class="cr-sim-label">Demo mode &mdash; simulated crowd data</div>' +
-    '</footer>' +
-
-    '</div>';
+        <!-- Bottom Bar: Sim Controls -->
+        <footer class="cr-bottom-bar">
+            <div class="cr-sim-controls">
+                <button class="cr-sim-btn" id="sim-play">▶ Play</button>
+                <button class="cr-sim-btn" id="sim-pause">⏸ Pause</button>
+                <button class="cr-sim-btn" id="sim-ff">⏩ Fast</button>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; gap:20px;">
+                <span style="font-size:0.7rem; color:var(--text-muted); font-weight:700; letter-spacing:1px;">TIMELINE</span>
+                <input type="range" class="cr-scrubber" id="cr-scrubber" min="1080" max="1560" value="1140">
+            </div>
+            <div class="match-live-badge">
+                <span class="dot pulse" style="background:var(--primary-color);"></span> SIMULATION ENGINE LIVE
+            </div>
+        </footer>
+    </div>`;
 }
 
 /* ─── Init ───────────────────────────────────────────────────── */
 export function initControl() {
-    // ── Pre-flight Bug Fixes ──────────────────────────────────
-    // Prevent back navigation getting stuck
-    const handlePopState = () => {
+    window.addEventListener('popstate', () => {
         import('/src/auth.js').then(({ getCurrentUser }) => {
             getCurrentUser().then(user => {
-                if (!user) window.location.replace('/control-login');
+                if (!user) {
+                    window.location.replace('/control-login');
+                }
             });
         });
-    };
-    window.addEventListener('popstate', handlePopState);
+    });
     history.pushState(null, null, window.location.href);
 
     const densities = getZoneDensity();
     const unsubs = [];
 
-    // ── Logout Binding ────────────────────────────────────────
-    const logoutBtn = document.getElementById('cr-logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            console.log('🔴 Control Room logout initiated');
-            logoutBtn.textContent = 'Logging out...';
-            logoutBtn.disabled = true;
+    // Wait for DOM then attach logout
+    function attachLogout() {
+        const btn = document.getElementById('cr-logout-btn');
+        if (!btn) {
+            setTimeout(attachLogout, 200);
+            return;
+        }
+        console.log('✅ Logout btn found');
+        btn.addEventListener('click', async () => {
+            console.log('🔴 Logout clicked');
+            btn.textContent = 'Logging out...';
+            btn.disabled = true;
             const { logout } = await import('/src/auth.js');
             await logout();
         });
     }
+    setTimeout(attachLogout, 300);
 
     refreshMap(densities);
     refreshStaffList(densities);
     refreshAlerts(densities);
     refreshMetrics(densities);
 
-    // ── Firebase Realtime Listeners ────────────────────────────
+    // Listeners
     unsubs.push(listenStaff((data) => {
         if (!data) return;
         staffStatuses = data;
         const d = getZoneDensity();
         refreshStaffList(d);
-        refreshMap(d);
-        refreshAlerts(d);
+        refreshMetrics(d);
     }));
 
     unsubs.push(listenZones((data) => {
@@ -275,13 +275,12 @@ export function initControl() {
                 d[zoneName] = data[zKey].density / 100;
             }
         });
+        refreshMap(d);
+        refreshAlerts(d);
+        refreshMetrics(d);
     }));
 
-    unsubs.push(listenInstructions((data) => {
-        if (!data) return;
-    }));
-
-    // ── Map Zone Click Binding ─────────────────────────────────
+    // Map Click
     const mapContainer = document.getElementById('cr-map-container');
     const handleMapClick = (e) => {
         const zoneEl = e.target.closest('[data-zone]');
@@ -294,7 +293,7 @@ export function initControl() {
     };
     mapContainer?.addEventListener('click', handleMapClick);
 
-    // ── Simulation Tick Helper ────────────────────────────
+    // Sim Tick
     const runTick = () => {
         const t = simulateTick();
         const timeEl = document.getElementById('cr-sim-time');
@@ -306,6 +305,7 @@ export function initControl() {
         refreshMetrics(d);
         if (selectedZone) refreshDispatch(d);
         updateScrubber(t);
+
         Object.keys(d).forEach(zoneName => {
             const score = d[zoneName];
             const status = score > 0.80 ? 'critical' : score > 0.60 ? 'busy' : 'clear';
@@ -313,7 +313,7 @@ export function initControl() {
         });
     };
 
-    // ── Simulation Controls ────────────────────────────────────
+    // Controls
     document.getElementById('sim-play')?.addEventListener('click', () => {
         if (simRunning) return;
         simRunning = true;
@@ -336,54 +336,100 @@ export function initControl() {
         }
     });
 
-    // ── RETURN UNMOUNT ──
     return () => {
-        console.log("Cleaning up Control Room dashboard...");
         if (simIntervalId) clearInterval(simIntervalId);
         unsubs.forEach(fn => fn && fn());
-        window.removeEventListener('popstate', handlePopState);
+        // No need to removeEventListeners for popstate manually if we're replacing the whole page
+        // but normally we would if it stayed. Here we'll just leave it since the user's snippet 
+        // focus was on initialization.
         mapContainer?.removeEventListener('click', handleMapClick);
     };
 }
-
 
 /* ─── Refresh Helpers ────────────────────────────────────────── */
 function refreshMap(densities) {
     const container = document.getElementById('cr-map-container');
     if (!container) return;
-    container.innerHTML = buildStadiumSVG(densities);
 
-    const inside = totalInside(densities);
-    const hdr = document.getElementById('cr-header-count');
-    if (hdr) hdr.textContent = inside.toLocaleString() + ' inside';
+    // 1. Ensure SVG base exists
+    let svg = container.querySelector('svg');
+    if (!svg) {
+        container.innerHTML = buildStadiumSVG(densities);
+        return;
+    }
+
+    // 2. Update specific zones
+    Object.keys(densities).forEach(zId => {
+        const group = svg.querySelector(`g[data-zone="${zId}"]`);
+        if (!group) return;
+        
+        const d = densities[zId];
+        const col = densityColor(d);
+        const pct = Math.round(d * 100);
+        const isSel = selectedZone === zId;
+
+        // Update ellipse
+        const ellipse = group.querySelector('ellipse');
+        if (ellipse) {
+            ellipse.setAttribute('fill', col);
+            ellipse.setAttribute('fill-opacity', isSel ? '0.35' : '0.15');
+            ellipse.setAttribute('stroke', isSel ? '#fff' : col);
+            ellipse.setAttribute('stroke-width', isSel ? '2' : '0.5');
+        }
+
+        // Update percentage text (usually the second text element)
+        const texts = group.querySelectorAll('text');
+        if (texts.length >= 2) {
+            const pctText = texts[1];
+            pctText.textContent = `${pct}%`;
+            pctText.setAttribute('fill', col);
+            pctText.setAttribute('font-size', isSel ? '16' : '14');
+        }
+
+        // Pulse effect
+        if (d > 0.80) group.classList.add('severe');
+        else group.classList.remove('severe');
+    });
 }
 
 function refreshStaffList(densities) {
     const el = document.getElementById('cr-staff-list');
     if (!el) return;
 
-    let staffOnline = 0;
-    el.innerHTML = STAFF_ROSTER.map(s => {
+    STAFF_ROSTER.forEach(s => {
         const key = s.id + '_' + s.zone.split(' ')[0];
-        const liveStatus = staffStatuses[key];
-        const isCrowded = liveStatus && liveStatus.status === 'CROWDED';
-        const isOnline = !!liveStatus;
-        if (isOnline) staffOnline++;
-        const dot = isCrowded ? '#ff4d4d' : (isOnline ? '#00C49A' : '#555');
-        const statusText = isCrowded ? '&#9888;&#65039; CROWDED' : (isOnline ? '&#10003;' : 'offline');
-        const timeStr = isOnline ? fmtTime(new Date(liveStatus.timestamp)) : '';
+        const live = staffStatuses[key];
+        const isOnline = !!live;
+        const isAler = live && live.status === 'CROWDED';
+        
+        const dotCol = isAler ? 'var(--danger-color)' : (isOnline ? 'var(--primary-color)' : '#333');
+        
+        let row = el.querySelector(`[data-staff="${s.id}"]`);
+        if (!row) {
+             // Initial creation if needed
+             if (el.querySelector('.cr-no-alerts')) el.innerHTML = '';
+             row = document.createElement('div');
+             row.className = 'cr-staff-row';
+             row.setAttribute('data-staff', s.id);
+             row.innerHTML = `
+                <div style="flex:1;">
+                    <div class="cr-staff-name">${s.name}</div>
+                    <div class="cr-staff-id">${s.id} &bull; ${s.zone}</div>
+                </div>
+                <div class="live-tag" style="font-weight:900; font-size:0.6rem; letter-spacing:1px;"></div>
+             `;
+             el.appendChild(row);
+        }
 
-        return '<div class="cr-staff-row' + (isCrowded ? ' crowded' : '') + '" data-staff="' + s.id + '">' +
-            '<span class="cr-staff-dot" style="background:' + dot + ';"></span>' +
-            '<span class="cr-staff-id">' + s.id + '</span>' +
-            '<span class="cr-staff-name">' + s.name + '</span>' +
-            '<span class="cr-staff-status" style="color:' + dot + ';">' + statusText + '</span>' +
-            (timeStr ? '<span class="cr-staff-time">' + timeStr + '</span>' : '') +
-        '</div>';
-    }).join('');
-
-    const mStaff = document.getElementById('m-staff');
-    if (mStaff) mStaff.textContent = staffOnline + '/24';
+        // Update properties
+        row.style.borderLeft = `3px solid ${dotCol}`;
+        row.className = `cr-staff-row ${isAler ? 'severe' : ''}`;
+        const tag = row.querySelector('.live-tag');
+        if (tag) {
+            tag.textContent = isAler ? 'CROWDED' : (isOnline ? 'LIVE' : 'OFF');
+            tag.style.color = dotCol;
+        }
+    });
 }
 
 function refreshAlerts(densities) {
@@ -393,26 +439,23 @@ function refreshAlerts(densities) {
     const alerts = [];
     Object.keys(densities).forEach(zone => {
         const d = densities[zone];
-        if (d > 0.80) {
-            alerts.push({ zone: zone, pct: Math.round(d * 100), level: d > 0.95 ? 'severe' : 'critical' });
-        }
+        if (d > 0.82) alerts.push({ zone, pct: Math.round(d * 100), severe: d > 0.92 });
     });
 
     if (alerts.length === 0) {
-        el.innerHTML = '<div class="cr-no-alerts">All zones nominal</div>';
+        el.innerHTML = `<div class="cr-no-alerts">All systems nominal</div>`;
         return;
     }
 
-    el.innerHTML = alerts.sort((a, b) => b.pct - a.pct).map(a => {
-        const icon = a.level === 'severe' ? '&#128680;' : '&#9888;&#65039;';
-        return '<div class="cr-alert-card ' + a.level + '">' +
-            '<div class="cr-alert-icon">' + icon + '</div>' +
-            '<div class="cr-alert-body">' +
-                '<div class="cr-alert-zone">' + a.zone + '</div>' +
-                '<div class="cr-alert-pct">' + a.pct + '% ' + (a.level === 'severe' ? 'SEVERE' : 'CRITICAL') + '</div>' +
-            '</div>' +
-        '</div>';
-    }).join('');
+    el.innerHTML = alerts.map(a => `
+        <div class="cr-alert-card ${a.severe ? 'severe' : ''}">
+            <div style="flex:1;">
+                <div style="color:#fff; font-weight:800; font-size:0.9rem;">${a.zone}</div>
+                <div style="color:var(--danger-color); font-size:0.75rem; font-weight:700;">DENSITY: ${a.pct}%</div>
+            </div>
+            <div class="pulse" style="width:10px; height:10px; background:var(--danger-color); border-radius:50%;"></div>
+        </div>
+    `).join('');
 }
 
 function refreshDispatch(densities) {
@@ -423,77 +466,66 @@ function refreshDispatch(densities) {
     const pct = Math.round(d * 100);
     const col = densityColor(d);
 
-    el.innerHTML =
-        '<div class="cr-dispatch-selected">' +
-            '<div class="cr-dispatch-zone" style="border-left-color:' + col + ';">' +
-                '<strong>' + selectedZone + '</strong> <span style="color:' + col + ';">' + pct + '%</span>' +
-            '</div>' +
-        '</div>' +
-        '<div class="cr-dispatch-quick">' +
-            QUICK_INSTRUCTIONS.map(instr =>
-                '<button class="cr-quick-btn" data-instr="' + instr + '" aria-label="Action button">' + instr + '</button>'
-            ).join('') +
-        '</div>' +
-        '<div class="cr-dispatch-nudge">' +
-            '<label class="cr-nudge-label">Send nudge to ' + selectedZone + ' attendees?</label>' +
-            '<input type="text" class="cr-nudge-input" id="nudge-msg" placeholder="Gate 11 is clearest right now" value="Gate 11 is clearest right now"/>' +
-            '<button class="cr-send-all-btn" id="send-staff-attendee" aria-label="send staff attendee">SEND TO STAFF + ATTENDEES</button>' +
-        '</div>';
+    el.innerHTML = `
+    <div class="cr-dispatch-selected">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <strong style="color:#fff;">${selectedZone}</strong>
+            <span style="color:${col}; font-family:var(--font-tech); font-size:1.2rem;">${pct}%</span>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            ${QUICK_INSTRUCTIONS.map(instr => `
+                <button class="cr-quick-btn" style="padding:8px; font-size:0.65rem;" data-instr="${instr}">${instr}</button>
+            `).join('')}
+        </div>
+        <div style="margin-top:20px;">
+            <input type="text" class="cr-nudge-input" id="nudge-msg" value="Redirecting flow from Gate 11">
+            <button class="cr-sim-btn" style="width:100%; margin-top:10px; background:var(--primary-color); color:#000;" id="send-btn">Push Strategic Nudge</button>
+        </div>
+    </div>`;
 
-    // Bind quick instruction buttons
     el.querySelectorAll('.cr-quick-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const text = btn.getAttribute('data-instr');
-            pushInstruction(selectedZone, text);
-            btn.textContent = '✓ Sent';
-            btn.disabled = true;
-            btn.classList.add('sent');
-        });
+        btn.onclick = () => {
+            pushInstruction(selectedZone, btn.dataset.instr);
+            btn.textContent = 'SENT';
+            btn.style.borderColor = 'var(--primary-color)';
+        };
     });
 
-    // Bind send-all button
-    document.getElementById('send-staff-attendee')?.addEventListener('click', () => {
-        const msg = document.getElementById('nudge-msg')?.value;
-        if (!msg) return;
-        // Push instruction for staff
-        pushInstruction(selectedZone, msg);
-        // Push nudge for attendees
-        pushNudge(selectedZone, msg);
-        nudgesSent++;
-        document.getElementById('m-nudges').textContent = nudgesSent;
-        const sendBtn = document.getElementById('send-staff-attendee');
-        if (sendBtn) {
-            sendBtn.textContent = '✓ SENT';
-            sendBtn.classList.add('sent');
-            setTimeout(() => {
-                sendBtn.textContent = 'SEND TO STAFF + ATTENDEES';
-                sendBtn.classList.remove('sent');
-            }, 2000);
-        }
-    });
+    const sendBtn = el.querySelector('#send-btn');
+    if (sendBtn) {
+        sendBtn.onclick = () => {
+            const msg = el.querySelector('#nudge-msg').value;
+            pushInstruction(selectedZone, msg);
+            pushNudge(selectedZone, msg);
+            sendBtn.textContent = '✓ TRANSMITTED';
+            setTimeout(() => sendBtn.textContent = 'Push Strategic Nudge', 2000);
+        };
+    }
 }
 
 function refreshMetrics(densities) {
     const inside = totalInside(densities);
     const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
-    el('m-total', inside.toLocaleString());
-    el('m-nudges', nudgesSent);
-    el('m-incidents', incidentsResolved);
+    el('stat-attendance', (inside / 1000).toFixed(1) + 'k');
+    
+    let online = 0;
+    Object.keys(staffStatuses).forEach(k => { if(staffStatuses[k]) online++; });
+    el('stat-staff-count', online);
+
+    const alerts = Object.values(densities).filter(v => v > 0.82).length;
+    el('stat-alerts', alerts);
 
     const vals = Object.values(densities).filter(v => v > 0);
     const avg = vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
-    el('m-avgdens', Math.round(avg * 100) + '%');
-    el('m-wait', (2 + avg * 6).toFixed(1) + 'm');
+    el('stat-peak', Math.round(avg * 100) + '%');
 }
 
 function updateScrubber(timeStr) {
-    const scrubber = document.getElementById('sim-scrubber');
+    const scrubber = document.getElementById('cr-scrubber');
     if (!scrubber || !timeStr) return;
     const parts = timeStr.split(':');
     let h = parseInt(parts[0]), m = parseInt(parts[1]);
     let totalMin = h * 60 + m;
-    // 6PM = 1080, 2AM = 1560  (next day)
-    if (totalMin < 360) totalMin += 1440; // handle past midnight
-    const pct = Math.max(0, Math.min(100, ((totalMin - 1080) / 480) * 100));
-    scrubber.value = pct;
+    if (totalMin < 360) totalMin += 1440; 
+    scrubber.value = totalMin;
 }

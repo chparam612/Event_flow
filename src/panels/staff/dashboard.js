@@ -9,7 +9,6 @@ import {
 } from '/src/firebase.js';
 import { logout } from '/src/auth.js';
 
-
 const STAFF_ZONES = [
     'N1 North', 'N2 North', 'N3 North', 'N4 North',
     'S1 South', 'S2 South', 'E1 East', 'E2 East',
@@ -21,9 +20,8 @@ const STAFF_ZONES = [
 
 /* ─── State ──────────────────────────────────────────────────── */
 let session = null;
-let allInstructions = {};  // { id: { zoneId, message, sentAt, acknowledgedBy } }
 let latestInstruction = null;
-let zoneDensities = {};    // from /zones listener
+let zoneDensities = {};    
 
 function loadSession() {
     const saved = localStorage.getItem('eventflow_staff_session');
@@ -40,76 +38,98 @@ function getStaffId() {
 /* ─── Views ──────────────────────────────────────────────────── */
 function renderLogin() {
     let opts = '';
-    STAFF_ZONES.forEach(function(z) { opts += '<option value="' + z + '">' + z + '</option>'; });
-    return '<div class="staff-login-container">' +
-        '<div class="staff-login-card" style="padding:40px; background:#1a1a1a; border-radius:20px; text-align:center;">' +
-            '<h1 style="color:#fff; margin-bottom:8px;">Staff Portal</h1>' +
-            '<p style="color:#888; margin-bottom:30px;">Ground Stewards — NMS Ahmedabad</p>' +
-            '<select id="login-zone" style="width:100%; padding:15px; background:#222; border:1px solid #333; color:#fff; border-radius:10px; margin-bottom:20px;">' + opts + '</select>' +
-            '<input type="number" id="login-id" placeholder="Staff ID (numbers only)" style="width:100%; padding:15px; background:#222; border:1px solid #333; color:#fff; border-radius:10px; margin-bottom:30px;">' +
-            '<button class="primary-btn" id="login-btn" style="width:100%; height:60px; font-weight:700; border-radius:16px;" aria-label="login btn">Login to Portal</button>' +
-        '</div>' +
-    '</div>';
+    STAFF_ZONES.forEach(z => { opts += `<option value="${z}">${z}</option>`; });
+    
+    return `
+    <div class="staff-login-container" style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--background-color);">
+        <div class="premium-card glass" style="width:100%; max-width:400px; padding:40px; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:20px;">🧑‍✈️</div>
+            <h1 class="glow-text" style="font-size:1.8rem; margin-bottom:8px;">Staff Access</h1>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:30px;">Deploy to NMS Grounds</p>
+            
+            <div style="text-align:left; margin-bottom:20px;">
+                <label style="font-size:0.7rem; font-weight:800; color:var(--primary-color); letter-spacing:1px; margin-bottom:8px; display:block;">ASSIGNED ZONE</label>
+                <select id="login-zone" class="cr-nudge-input" style="background:rgba(255,255,255,0.05);">${opts}</select>
+            </div>
+
+            <div style="text-align:left; margin-bottom:30px;">
+                <label style="font-size:0.7rem; font-weight:800; color:var(--primary-color); letter-spacing:1px; margin-bottom:8px; display:block;">BADGE ID</label>
+                <input type="number" id="login-id" class="cr-nudge-input" placeholder="Enter ID" style="background:rgba(255,255,255,0.05);">
+            </div>
+
+            <button class="cr-send-all-btn" id="login-btn" style="height:55px; font-size:1rem;">INITIALIZE PORTAL</button>
+        </div>
+    </div>`;
 }
 
 function renderHome() {
     const status = session.status || 'clear';
     const isClear = status === 'clear';
     const zoneParts = (session.zone || '').split(' ');
-    const now = new Date();
-    const timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
-
-    // Find latest instruction for this staff's zone
-    let instrHtml = '<div style="opacity:0.4; font-style:italic;">No active instructions.</div>';
-    let instrId = null;
+    
+    let instrHtml = `<div style="opacity:0.4; font-style:italic; font-size:0.9rem;">Waiting for Control Room instructions...</div>`;
     if (latestInstruction) {
-        instrId = latestInstruction.id;
         const acked = latestInstruction.acknowledgedBy && latestInstruction.acknowledgedBy[getStaffId()];
-        instrHtml = '<div style="font-size:1.15rem; color:#fff; font-weight:600; line-height:1.4;">' + (latestInstruction.message || latestInstruction.text || '') + '</div>' +
-            '<div style="font-size:0.75rem; color:#666; margin-top:8px;">Zone: ' + (latestInstruction.zoneId || '') + '</div>' +
-            '<button id="ack-btn" data-iid="' + instrId + '" style="margin-top:20px; width:100%; height:50px; background:' + (acked ? '#00C49A22' : '#222') + '; border:1px solid ' + (acked ? '#00C49A' : '#444') + '; color:' + (acked ? '#00C49A' : '#fff') + '; border-radius:12px; font-weight:700; cursor:pointer;" aria-label="ack btn">' + (acked ? '✓ Acknowledged' : '✓ Samajh Gaya') + '</button>';
+        instrHtml = `
+            <div style="font-size:1.1rem; color:#fff; font-weight:700; line-height:1.4;">${latestInstruction.message || latestInstruction.text || ''}</div>
+            <button id="ack-btn" data-iid="${latestInstruction.id}" 
+                class="cr-sim-btn" 
+                style="margin-top:20px; width:100%; height:50px; background:${acked ? 'var(--primary-dim)' : 'rgba(255,255,255,0.05)'}; 
+                border-color:${acked ? 'var(--primary-color)' : 'var(--glass-border)'}; color:${acked ? 'var(--primary-color)' : '#fff'};">
+                ${acked ? '✓ ACKNOWLEDGED' : 'ACKNOWLEDGE RECEIPT'}
+            </button>`;
     }
 
-    return '<div class="staff-home-container" style="padding:20px;">' +
-        '<header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">' +
-            '<div>' +
-                '<h2 style="margin:0; color:#fff;">Zone ' + zoneParts[0] + '</h2>' +
-                '<p style="color:#888; margin:0;">Staff #' + session.staffId + ' | ' + timeStr + '</p>' +
-            '</div>' +
-            '<button id="logout-btn" style="background:transparent; border:1px solid #444; color:#888; padding:8px 15px; border-radius:8px; cursor:pointer;" aria-label="logout btn">Logout</button>' +
-        '</header>' +
+    return `
+    <div class="staff-home-wrapper" style="padding:20px; background:var(--background-color); min-height:100vh;">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <div>
+                <h2 style="font-size:1.4rem; color:#fff; font-weight:800;">${session.zone}</h2>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="dot pulse" style="background:${isClear ? 'var(--primary-color)' : 'var(--danger-color)'}"></span>
+                    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">PORTAL ACTIVE &bull; ID#${session.staffId}</span>
+                </div>
+            </div>
+            <button id="logout-btn" style="font-size:0.7rem; font-weight:800; color:var(--danger-color); background:transparent; border:none; letter-spacing:1px;">LEAVE POST</button>
+        </header>
 
-        /* Status Toggle */
-        '<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:30px;">' +
-            '<button id="btn-clear" style="height:160px; border-radius:20px; border:2px solid ' + (isClear ? '#00C49A' : '#333') + '; background:' + (isClear ? '#00C49A18' : '#1a1a1a') + '; color:' + (isClear ? '#00C49A' : '#555') + '; font-weight:700; font-size:0.95rem; cursor:pointer;" aria-label="btn clear">' +
-                '<span style="font-size:2.8rem; display:block; margin-bottom:8px;">🟢</span>MY ZONE IS CLEAR</button>' +
-            '<button id="btn-crowded" style="height:160px; border-radius:20px; border:2px solid ' + (!isClear ? '#ff4d4d' : '#333') + '; background:' + (!isClear ? '#ff4d4d18' : '#1a1a1a') + '; color:' + (!isClear ? '#ff4d4d' : '#555') + '; font-weight:700; font-size:0.95rem; cursor:pointer;" aria-label="btn crowded">' +
-                '<span style="font-size:2.8rem; display:block; margin-bottom:8px;">🔴</span>MY ZONE IS CROWDED</button>' +
-        '</div>' +
+        <!-- Main Dashboard -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:25px;">
+            <div id="btn-clear" class="premium-card glass" style="padding:25px; text-align:center; border:2px solid ${isClear ? 'var(--primary-color)' : 'transparent'};">
+                <div style="font-size:2rem; margin-bottom:10px;">🟢</div>
+                <div style="font-size:0.8rem; font-weight:800; color:${isClear ? 'var(--primary-color)' : 'var(--text-muted)'}">MY ZONE IS<br>CLEAR</div>
+            </div>
+            <div id="btn-crowded" class="premium-card glass" style="padding:25px; text-align:center; border:2px solid ${!isClear ? 'var(--danger-color)' : 'transparent'};">
+                <div style="font-size:2rem; margin-bottom:10px;">🔴</div>
+                <div style="font-size:0.8rem; font-weight:800; color:${!isClear ? 'var(--danger-color)' : 'var(--text-muted)'}">MY ZONE IS<br>CROWDED</div>
+            </div>
+        </div>
 
-        /* Instruction Card */
-        '<div style="background:#1a1a1a; border-radius:20px; padding:22px; border:1px solid #333; margin-bottom:20px;">' +
-            '<div style="font-size:0.72rem; color:#666; font-weight:800; margin-bottom:12px; letter-spacing:1.5px; text-transform:uppercase;">CONTROL ROOM INSTRUCTION</div>' +
-            instrHtml +
-        '</div>' +
+        <!-- Latest Instruction -->
+        <div class="premium-card glass" style="padding:25px; margin-bottom:25px; border-left:4px solid var(--primary-color);">
+            <div style="font-size:0.65rem; font-weight:900; color:var(--primary-color); letter-spacing:2px; margin-bottom:12px;">COMMAND DIRECTIVE</div>
+            ${instrHtml}
+        </div>
 
-        /* Quick Report */
-        '<div style="margin-bottom:20px;">' +
-            '<div style="font-size:0.72rem; color:#666; font-weight:800; margin-bottom:10px; letter-spacing:1.5px; text-transform:uppercase;">QUICK REPORT</div>' +
-            '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">' +
-                '<button class="report-btn" data-type="crowd" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">👥 Bheed badh rahi</button>' +
-                '<button class="report-btn" data-type="clear" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">✅ Area clear</button>' +
-                '<button class="report-btn" data-type="medical" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">🚑 Medical needed</button>' +
-                '<button class="report-btn" data-type="other" style="padding:16px; background:#1a1a1a; border:1px solid #333; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;" aria-label="Action button">⚠️ Kuch aur...</button>' +
-            '</div>' +
-        '</div>' +
+        <!-- Density Feed -->
+        <div class="premium-card" style="background:rgba(0,0,0,0.3); padding:20px; border: 1px solid var(--glass-border);">
+            <div style="font-size:0.65rem; font-weight:900; color:var(--text-muted); letter-spacing:1.5px; margin-bottom:15px;">NEARBY SECTORS</div>
+            <div id="staff-zone-densities" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="cr-no-alerts">Syncing grid data...</div>
+            </div>
+        </div>
 
-        /* Zone Density (from Firebase) */
-        '<div style="background:#111; border-radius:14px; padding:14px; border:1px solid #222;">' +
-            '<div style="font-size:0.72rem; color:#555; font-weight:800; margin-bottom:8px; letter-spacing:1px;">NEARBY ZONE DENSITIES</div>' +
-            '<div id="staff-zone-densities" style="font-size:0.82rem; color:#888;">Loading...</div>' +
-        '</div>' +
-    '</div>';
+        <!-- Status Reports -->
+        <div style="margin-top:30px;">
+            <div style="font-size:0.65rem; font-weight:900; color:var(--text-muted); letter-spacing:1.5px; margin-bottom:15px;">RAPID REPORTS</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="report-btn cr-sim-btn" data-type="crowd">👥 Heavy Flow</button>
+                <button class="report-btn cr-sim-btn" data-type="clear">✅ Sector Clear</button>
+                <button class="report-btn cr-sim-btn" data-type="medical">🚑 Med Needed</button>
+                <button class="report-btn cr-sim-btn" data-type="other">⚠️ Other Report</button>
+            </div>
+        </div>
+    </div>`;
 }
 
 /* ─── Main Entry Points ──────────────────────────────────────── */
@@ -123,13 +143,11 @@ export function initStaff() {
     const app = document.getElementById('app');
     if (!app) return;
 
-    // ── Firebase Listeners ────────────────────────────────────
     const unsubs = [];
 
-    // Listen to /instructions for real-time commands
+    // Instructions
     unsubs.push(listenInstructions((data) => {
-        if (!data) { allInstructions = {}; latestInstruction = null; return; }
-        allInstructions = data;
+        if (!data) { latestInstruction = null; return; }
         let latest = null, latestKey = null;
         Object.keys(data).forEach(key => {
             const inst = data[key];
@@ -140,77 +158,105 @@ export function initStaff() {
         });
         if (latest) {
             latestInstruction = { ...latest, id: latestKey };
-            // Update specific text if exists
-            const textEl = document.getElementById('latest-instruction-text');
-            if (textEl) textEl.textContent = latest.message || latest.text || '';
-            // NOTE: We avoid full refreshUI() here to prevent recursive leaks
-            // If significant change needed, update DOM directly
+            // If home view is active, update just the instruction box if it's there
+            // Usually we'll just navigate to self to refresh the whole template
+            if (session) window.navigate('/staff');
         }
     }));
 
-    // Listen to /zones for density overlay
+    // Densities
     unsubs.push(listenZones((data) => {
         if (!data) return;
         zoneDensities = data;
         const el = document.getElementById('staff-zone-densities');
-        if (el) {
-            let html = '';
-            Object.keys(data).forEach(zoneKey => {
-                const z = data[zoneKey];
-                const d = z.density || 0;
-                const col = d > 80 ? '#ff4d4d' : d > 60 ? '#ffd166' : '#00C49A';
-                html += '<div style="display:flex; justify-content:space-between; padding:4px 0;">' +
-                    '<span>' + zoneKey.replace(/_/g, ' ') + '</span>' +
-                    '<span style="color:' + col + '; font-weight:700;">' + d + '% ' + (z.status || '') + '</span></div>';
-            });
-            el.innerHTML = html || 'No zone data yet.';
-        }
+        if (!el) return;
+
+        Object.keys(data).forEach(zoneKey => {
+            const z = data[zoneKey];
+            const d = z.density || 0;
+            const col = d > 82 ? 'var(--danger-color)' : (d > 60 ? 'var(--warning-color)' : 'var(--primary-color)');
+            
+            // Try to find existing row
+            let row = el.querySelector(`[data-zone-key="${zoneKey}"]`);
+            if (!row) {
+                // Create if not exists
+                row = document.createElement('div');
+                row.setAttribute('data-zone-key', zoneKey);
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.innerHTML = `<span class="z-name" style="font-size:0.85rem; color:#eee;"></span> <span class="z-val" style="font-family:var(--font-tech); font-weight:700;"></span>`;
+                el.appendChild(row);
+            }
+
+            // Update content
+            const nameEl = row.querySelector('.z-name');
+            const valEl = row.querySelector('.z-val');
+            if (nameEl) nameEl.textContent = zoneKey.replace(/_/g, ' ');
+            if (valEl) {
+                valEl.textContent = `${d}%`;
+                valEl.style.color = col;
+            }
+        });
+
+        // Cleanup any rows that are no longer in data
+        Array.from(el.children).forEach(child => {
+            const key = child.getAttribute('data-zone-key');
+            if (key && !data[key]) child.remove();
+        });
     }));
 
-    // ── Event Bindings ────────────────────────────────────────
-    // Login
-    app.querySelector('#login-btn')?.addEventListener('click', (e) => {
-        const btn = e.currentTarget;
+    // Login Event
+    app.querySelector('#login-btn')?.addEventListener('click', () => {
         const zone = app.querySelector('#login-zone')?.value;
         const id = app.querySelector('#login-id')?.value;
         if (!id) return alert('Please enter Staff ID');
         
-        btn.innerHTML = '<span class="loading-spinner"></span> Logging in...';
-        btn.disabled = true;
-
-        setTimeout(() => {
-            saveSession({ zone, staffId: id, status: 'clear' });
-            writeStaff(id, { zoneId: zone, status: 'clear', online: true });
-            // Navigate/Refresh
-            window.navigate('/staff');
-        }, 600);
+        saveSession({ zone, staffId: id, status: 'clear' });
+        writeStaff(id, { zoneId: zone, status: 'clear', online: true });
+        window.navigate('/staff');
     });
 
-    // Logout Binding
-    app.querySelector('#logout-btn')?.addEventListener('click', async () => {
-        const btn = app.querySelector('#logout-btn');
-        if (btn) { btn.textContent = 'Logging out...'; btn.disabled = true; }
-        const { logout } = await import('/src/auth.js');
-        await logout();
-    });
+    // Logout
+    function attachStaffLogout() {
+        const btn = document.querySelector(
+            '#staff-logout-btn, .logout-btn, ' +
+            'button[aria-label*="logout"], ' +
+            'button[aria-label*="Logout"]'
+        ) || Array.from(document.querySelectorAll('button'))
+             .find(b => b.textContent.includes('Logout') || 
+                        b.textContent.includes('logout'));
+        
+        if (!btn) {
+            setTimeout(attachStaffLogout, 200);
+            return;
+        }
+        console.log('✅ Staff logout btn found');
+        btn.addEventListener('click', async () => {
+            btn.textContent = 'Logging out...';
+            btn.disabled = true;
+            const { logout } = await import('/src/auth.js');
+            await logout();
+        });
+    }
+    setTimeout(attachStaffLogout, 300);
 
-    // Status toggles
+    // Status Toggles
     app.querySelector('#btn-clear')?.addEventListener('click', () => setStatus('clear'));
     app.querySelector('#btn-crowded')?.addEventListener('click', () => setStatus('crowded'));
 
-    // Acknowledge instruction
+    // Ack
     app.querySelector('#ack-btn')?.addEventListener('click', (e) => {
         const iid = e.target.getAttribute('data-iid');
         if (iid && session) {
             acknowledgeInstruction(iid, getStaffId());
-            e.target.textContent = '✓ Acknowledged';
-            e.target.style.background = '#00C49A22';
-            e.target.style.borderColor = '#00C49A';
-            e.target.style.color = '#00C49A';
+            e.target.textContent = '✓ ACKNOWLEDGED';
+            e.target.style.color = 'var(--primary-color)';
+            e.target.style.background = 'var(--primary-dim)';
         }
     });
 
-    // Quick reports
+    // Reports
     app.querySelectorAll('.report-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.getAttribute('data-type');
@@ -221,19 +267,15 @@ export function initStaff() {
                 message: btn.textContent.trim(),
                 timestamp: Date.now()
             });
-            btn.style.borderColor = '#00C49A';
-            btn.textContent = '✓ Sent';
+            btn.textContent = '✓ SENT';
             setTimeout(() => {
-                btn.style.borderColor = '#333';
-                const labels = { crowd: '👥 Bheed badh rahi', clear: '✅ Area clear', medical: '🚑 Medical needed', other: '⚠️ Kuch aur...' };
+                const labels = { crowd: '👥 Heavy Flow', clear: '✅ Sector Clear', medical: '🚑 Med Needed', other: '⚠️ Other Report' };
                 btn.textContent = labels[type] || type;
             }, 2000);
         });
     });
 
-    // RETURN UNMOUNT
     return () => {
-        console.log("Cleaning up Staff dashboard listeners...");
         unsubs.forEach(fn => fn && fn());
     };
 }
@@ -243,7 +285,5 @@ function setStatus(status) {
     session.status = status;
     saveSession(session);
     writeStaff(session.staffId, { zoneId: session.zone, status: status, online: true });
-    // Instead of refreshUI, we just navigate to self or update DOM
     window.navigate('/staff');
 }
-
