@@ -19,8 +19,10 @@ const appDiv = document.getElementById('app');
 
 /* ─── Navigate helper (global) ───────────────────────── */
 function navigate(path) {
-    window.history.pushState({}, '', path);
-    router();
+  // Update browser URL without page reload
+  window.history.pushState({}, '', path);
+  // Then render correct panel
+  renderPanel(getInitialRoute());
 }
 // Expose globally so panel modules can call window.navigate('/path')
 window.navigate = navigate;
@@ -58,24 +60,6 @@ async function requireAuth(requiredRole, loginPath) {
     return true;
 }
 
-/* ─── Routes ─────────────────────────────────────────── */
-const routes = {
-    '/':              'landing',
-    '/attendee':      'attendee',
-    '/language':      'language',
-    '/intake':        'intake',
-    '/plan':          'plan',
-    '/escort':        'escort',
-    '/during':        'during',
-    '/exit':          'exit',
-    '/feedback':      'feedback',
-    '/staff-login':   'staff-login',
-    '/staff':         'staff',
-    '/control-login': 'control-login',
-    '/control':       'control',
-    '/help':          'help',
-    '/how-it-works':  'how'
-};
 
 /* ─── Render Panel ───────────────────────────────────── */
 async function renderPanel(panelName) {
@@ -162,28 +146,46 @@ async function renderPanel(panelName) {
 }
 
 /* ─── Router ─────────────────────────────────────────── */
-const router = () => {
-    const path = window.location.pathname;
-    // Save to sessionStorage for debug/analytics
-    sessionStorage.setItem('ef_last_path', path);
-    const panelName = routes[path] || '404';
-    renderPanel(panelName);
-};
-
-window.addEventListener('popstate', router);
-
-console.log('EventFlow Router v2.1 Initializing...');
-if (appDiv) {
-    router();
-} else {
-    console.error('Critical Error: #app container not found in DOM');
+function getInitialRoute() {
+  // Read from current browser URL
+  const path = window.location.pathname;
+  
+  // Map URL paths to panel names
+  const routes = {
+    '/': 'landing',
+    '/attendee': 'attendee',
+    '/language': 'language',
+    '/intake': 'intake',
+    '/plan': 'plan',
+    '/escort': 'escort',
+    '/during': 'during',
+    '/exit': 'exit',
+    '/feedback': 'feedback',
+    '/staff-login': 'staff-login',
+    '/staff': 'staff',
+    '/control-login': 'control-login',
+    '/control': 'control',
+    '/help': 'help',
+    '/how-it-works': 'how'
+  };
+  
+  return routes[path] || 'landing';
 }
+
+// On app start — read URL and render correct panel
+document.addEventListener('DOMContentLoaded', () => {
+  renderPanel(getInitialRoute());
+});
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', () => {
+  renderPanel(getInitialRoute());
+});
 
 document.body.addEventListener('click', e => {
     const link = e.target.closest('[data-link]');
     if (link) {
         e.preventDefault();
-        window.history.pushState(null, null, link.href);
-        router();
+        navigate(link.getAttribute('href') || link.href);
     }
 });

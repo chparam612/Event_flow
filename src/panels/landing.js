@@ -143,22 +143,27 @@ export function initLanding() {
     };
 
     // ── Fan Button: Anonymous Auth → /attendee ─────────────────
-    document.getElementById('btn-fan')?.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const btn = document.getElementById('btn-fan');
-        btn.textContent = 'Setting up...';
-        btn.disabled = true;
-        btn.style.opacity = '0.7';
-
-        try {
-            await loginAsAttendee();
-            navigate('/attendee');
-        } catch (error) {
-            console.error('Could not start session:', error);
-            // Graceful fallback — still let user in
-            navigate('/attendee');
-        }
-    });
+    const attendeeBtn = document.getElementById('btn-fan');
+    if (attendeeBtn) {
+        attendeeBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            // Show loading state
+            attendeeBtn.textContent = 'Setting up...';
+            attendeeBtn.disabled = true;
+            
+            try {
+                await loginAsAttendee();
+                navigate('/attendee');
+            } catch (error) {
+                attendeeBtn.textContent = 'Enter as Fan';
+                attendeeBtn.disabled = false;
+                console.error('Could not start session:', error);
+                // Still navigate even if anonymous auth fails
+                // So user experience is not broken
+                navigate('/attendee');
+            }
+        });
+    }
 
     // ── Staff Button ────────────────────────────────────────────
     document.getElementById('btn-staff')?.addEventListener('click', (e) => {

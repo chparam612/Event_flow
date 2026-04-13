@@ -48,46 +48,35 @@ export async function loginWithEmail(email, password) {
 }
 
 /* ─── Anonymous Login (for Attendees) ───────────────── */
-export async function loginAnonymously() {
-    try {
-        const cred = await signInAnonymously(auth);
-        localStorage.setItem('eventflow_role', 'attendee');
-        localStorage.setItem('eventflow_uid', cred.user.uid);
-        console.log('Anonymous login success:', cred.user.uid);
-        return cred.user;
-    } catch (error) {
-        console.error('Anonymous login failed:', error.code, error.message);
-        // Bulletproof fallback: If Firebase anonymous auth is disabled or fails,
-        // we still set a local UID so the attendee SPA experience is not broken.
-        const fallbackUid = 'anon_' + Math.random().toString(36).substring(2, 10);
-        localStorage.setItem('eventflow_role', 'attendee');
-        localStorage.setItem('eventflow_uid', fallbackUid);
-        console.warn('Using local fallback UID for Attendee:', fallbackUid);
-        return { uid: fallbackUid, isAnonymous: true };
-    }
+export async function loginAsAttendee() {
+  try {
+    const result = await signInAnonymously(auth);
+    localStorage.setItem('eventflow_role', 'attendee');
+    localStorage.setItem('eventflow_uid', result.user.uid);
+    console.log('Anonymous login success:', result.user.uid);
+    return result.user;
+  } catch (error) {
+    console.error('Anonymous login failed:', error);
+    throw error;
+  }
 }
-
-// Alias — used in landing.js
-export const loginAsAttendee = loginAnonymously;
 
 /* ─── Logout ─────────────────────────────────────────── */
 export async function logout() {
-    console.log('Logout called');
-    try {
-        if (auth) await signOut(auth);
-    } catch (e) {
-        console.warn('Firebase signOut error:', e.message);
-    } finally {
-        // Clear all local state
-        sessionStorage.clear();
-        localStorage.removeItem('eventflow_staff_session');
-        localStorage.removeItem('eventflow_control_session');
-        localStorage.removeItem('eventflow_zone');
-        localStorage.removeItem('eventflow_role');
-        localStorage.removeItem('eventflow_uid');
-        // Hard redirect to landing page
-        window.location.href = '/';
-    }
+  console.log('Logout called');
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.error('Logout error:', e);
+  } finally {
+    // Clear all stored data
+    sessionStorage.clear();
+    localStorage.removeItem('eventflow_zone');
+    localStorage.removeItem('eventflow_role');
+    localStorage.removeItem('eventflow_uid');
+    // Hard redirect to landing page
+    window.location.href = '/';
+  }
 }
 window.efLogout = logout;
 
