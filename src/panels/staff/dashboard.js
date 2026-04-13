@@ -124,11 +124,12 @@ export function initStaff() {
     if (!app) return;
 
     // ── Firebase Listeners ────────────────────────────────────
+    const unsubs = [];
+
     // Listen to /instructions for real-time commands
-    listenInstructions((data) => {
+    unsubs.push(listenInstructions((data) => {
         if (!data) { allInstructions = {}; latestInstruction = null; return; }
         allInstructions = data;
-        // Find latest instruction (highest sentAt)
         let latest = null, latestKey = null;
         Object.keys(data).forEach(key => {
             const inst = data[key];
@@ -139,20 +140,20 @@ export function initStaff() {
         });
         if (latest) {
             latestInstruction = { ...latest, id: latestKey };
+            // Update specific text if exists
             const textEl = document.getElementById('latest-instruction-text');
-            // Only update if we're on the home view
-            if (document.getElementById('btn-clear')) {
-                refreshUI();
-            }
+            if (textEl) textEl.textContent = latest.message || latest.text || '';
+            // NOTE: We avoid full refreshUI() here to prevent recursive leaks
+            // If significant change needed, update DOM directly
         }
-    });
+    }));
 
     // Listen to /zones for density overlay
-    listenZones((data) => {
+    unsubs.push(listenZones((data) => {
         if (!data) return;
         zoneDensities = data;
         const el = document.getElementById('staff-zone-densities');
-        if (el && data) {
+        if (el) {
             let html = '';
             Object.keys(data).forEach(zoneKey => {
                 const z = data[zoneKey];
@@ -164,52 +165,34 @@ export function initStaff() {
             });
             el.innerHTML = html || 'No zone data yet.';
         }
-    });
+    }));
 
     // ── Event Bindings ────────────────────────────────────────
     // Login
     app.querySelector('#login-btn')?.addEventListener('click', (e) => {
         const btn = e.currentTarget;
-        const originalText = btn.textContent;
         const zone = app.querySelector('#login-zone')?.value;
         const id = app.querySelector('#login-id')?.value;
         if (!id) return alert('Please enter Staff ID');
         
-        // Show spinner
-        btn.innerHTML = '<span class="loading-spinner" style="width:20px;height:20px;border-width:2px;margin-right:8px;"></span> Logging in...';
+        btn.innerHTML = '<span class="loading-spinner"></span> Logging in...';
         btn.disabled = true;
 
         setTimeout(() => {
             saveSession({ zone, staffId: id, status: 'clear' });
-            // Write to Firebase: /staff/{staffId}
             writeStaff(id, { zoneId: zone, status: 'clear', online: true });
-            refreshUI();
-        }, 600); // simulate network delay for UX
+            // Navigate/Refresh
+            window.navigate('/staff');
+        }, 600);
     });
 
-    function attachStaffLogout() {
-        const btn = document.querySelector(
-            '#staff-logout-btn, .logout-btn, ' +
-            'button[aria-label*="logout"], ' +
-            'button[aria-label*="Logout"]'
-        ) || Array.from(document.querySelectorAll('button'))
-             .find(b => b.textContent.includes('Logout') || 
-                        b.textContent.includes('logout'));
-        
-        if (!btn) {
-            setTimeout(attachStaffLogout, 200);
-            return;
-        }
-        console.log('✅ Staff logout btn found');
-        btn.addEventListener('click', async () => {
-            btn.textContent = 'Logging out...';
-            btn.disabled = true;
-            const { logout } = await import('/src/auth.js');
-            await logout();
-        });
-    }
-    setTimeout(attachStaffLogout, 300);
-
+    // Logout Binding
+    app.querySelector('#logout-btn')?.addEventListener('click', async () => {
+        const btn = app.querySelector('#logout-btn');
+        if (btn) { btn.textContent = 'Logging out...'; btn.disabled = true; }
+        const { logout } = await import('/src/auth.js');
+        await logout();
+    });
 
     // Status toggles
     app.querySelector('#btn-clear')?.addEventListener('click', () => setStatus('clear'));
@@ -247,21 +230,20 @@ export function initStaff() {
             }, 2000);
         });
     });
+
+    // RETURN UNMOUNT
+    return () => {
+        console.log("Cleaning up Staff dashboard listeners...");
+        unsubs.forEach(fn => fn && fn());
+    };
 }
 
 function setStatus(status) {
     if (!session) return;
     session.status = status;
     saveSession(session);
-    // Write to Firebase: /staff/{staffId}
     writeStaff(session.staffId, { zoneId: session.zone, status: status, online: true });
-    refreshUI();
+    // Instead of refreshUI, we just navigate to self or update DOM
+    window.navigate('/staff');
 }
 
-function refreshUI() {
-    const appDiv = document.getElementById('app');
-    if (appDiv) {
-        appDiv.innerHTML = renderStaff();
-        initStaff();
-    }
-}

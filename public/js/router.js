@@ -61,74 +61,85 @@ async function requireAuth(requiredRole, loginPath) {
 }
 
 
+let currentUnmount = null;
+
 /* ─── Render Panel ───────────────────────────────────── */
 async function renderPanel(panelName) {
+    // 1. Cleanup previous panel logic
+    if (typeof currentUnmount === 'function') {
+        console.log(`[Router] Unmounting previous panel...`);
+        try { currentUnmount(); } catch(e) { console.error("Unmount error:", e); }
+        currentUnmount = null;
+    }
+
+    let initResult = null;
+
     switch(panelName) {
         case 'landing':
             appDiv.innerHTML = renderLanding();
-            initLanding();
+            initResult = initLanding();
             break;
         case 'attendee':
             appDiv.innerHTML = renderWelcome();
-            initWelcome();
+            initResult = initWelcome();
             break;
         case 'language':
             appDiv.innerHTML = renderLanguage();
-            initLanguage();
+            initResult = initLanguage();
             break;
         case 'intake':
             appDiv.innerHTML = renderIntake();
-            initIntake();
+            initResult = initIntake();
             break;
         case 'plan':
             appDiv.innerHTML = renderPlan();
-            initPlan();
+            initResult = initPlan();
             break;
         case 'escort':
             appDiv.innerHTML = renderEscort();
-            initEscort();
+            initResult = initEscort();
             break;
         case 'during':
             appDiv.innerHTML = renderDuring();
-            initDuring();
+            initResult = initDuring();
             break;
         case 'exit':
             appDiv.innerHTML = renderExit();
-            initExit();
+            initResult = initExit();
             break;
         case 'feedback':
             appDiv.innerHTML = renderFeedback();
-            initFeedback();
+            initResult = initFeedback();
             break;
         case 'how':
             appDiv.innerHTML = renderHow();
-            initHow();
+            initResult = initHow();
             break;
         case 'staff-login':
             appDiv.innerHTML = renderStaffLogin();
-            initStaffLogin();
+            initResult = initStaffLogin();
             break;
         case 'staff': {
             const ok = await requireAuth('staff', '/staff-login');
             if (!ok) return;
             appDiv.innerHTML = renderStaff();
-            initStaff();
+            initResult = initStaff();
             break;
         }
         case 'control-login':
             appDiv.innerHTML = renderControlLogin();
-            initControlLogin();
+            initResult = initControlLogin();
             break;
         case 'control': {
             const ok = await requireAuth('control', '/control-login');
             if (!ok) return;
             appDiv.innerHTML = renderControl();
-            initControl();
+            initResult = initControl();
             break;
         }
         case 'help':
             appDiv.innerHTML = renderHelp();
-            initHelp();
+            initResult = initHelp();
             break;
         default:
             appDiv.innerHTML = `
@@ -143,7 +154,13 @@ async function renderPanel(panelName) {
                 </div>`;
             break;
     }
+
+    // 2. Store new cleanup if provided
+    if (typeof initResult === 'function') {
+        currentUnmount = initResult;
+    }
 }
+
 
 /* ─── Router ─────────────────────────────────────────── */
 function getInitialRoute() {

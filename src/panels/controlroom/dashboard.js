@@ -224,61 +224,50 @@ export function renderControl() {
 
 /* ─── Init ───────────────────────────────────────────────────── */
 export function initControl() {
+    // ── Pre-flight Bug Fixes ──────────────────────────────────
     // Prevent back navigation getting stuck
-    window.addEventListener('popstate', () => {
+    const handlePopState = () => {
         import('/src/auth.js').then(({ getCurrentUser }) => {
             getCurrentUser().then(user => {
-                if (!user) {
-                    window.location.replace('/control-login');
-                }
+                if (!user) window.location.replace('/control-login');
             });
         });
-    });
-    // Also disable browser back from control room
+    };
+    window.addEventListener('popstate', handlePopState);
     history.pushState(null, null, window.location.href);
 
     const densities = getZoneDensity();
+    const unsubs = [];
 
-    // ... rest of initialization ...
-    // Wait for DOM then attach logout
-    function attachLogout() {
-        const btn = document.getElementById('cr-logout-btn');
-        if (!btn) {
-            setTimeout(attachLogout, 200);
-            return;
-        }
-        console.log('✅ Logout btn found');
-        btn.addEventListener('click', async () => {
-            console.log('🔴 Logout clicked');
-            btn.textContent = 'Logging out...';
-            btn.disabled = true;
+    // ── Logout Binding ────────────────────────────────────────
+    const logoutBtn = document.getElementById('cr-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            console.log('🔴 Control Room logout initiated');
+            logoutBtn.textContent = 'Logging out...';
+            logoutBtn.disabled = true;
             const { logout } = await import('/src/auth.js');
             await logout();
         });
     }
-    setTimeout(attachLogout, 300);
 
-    // Existing event bindings...
     refreshMap(densities);
     refreshStaffList(densities);
     refreshAlerts(densities);
     refreshMetrics(densities);
 
     // ── Firebase Realtime Listeners ────────────────────────────
-    // /staff — live staff status from ground stewards
-    listenStaff((data) => {
+    unsubs.push(listenStaff((data) => {
         if (!data) return;
         staffStatuses = data;
         const d = getZoneDensity();
         refreshStaffList(d);
         refreshMap(d);
         refreshAlerts(d);
-    });
+    }));
 
-    // /zones — zone density data (also written by this panel's sim tick)
-    listenZones((data) => {
+    unsubs.push(listenZones((data) => {
         if (!data) return;
-        // Merge Firebase zone data into local view
         const d = getZoneDensity();
         Object.keys(data).forEach(zKey => {
             const zoneName = zKey.replace(/_/g, ' ');
@@ -286,16 +275,15 @@ export function initControl() {
                 d[zoneName] = data[zKey].density / 100;
             }
         });
-    });
+    }));
 
-    // /instructions — monitor acknowledgments in real-time
-    listenInstructions((data) => {
+    unsubs.push(listenInstructions((data) => {
         if (!data) return;
-        // Could show ack counts in dispatch panel
-    });
+    }));
 
     // ── Map Zone Click Binding ─────────────────────────────────
-    document.getElementById('cr-map-container')?.addEventListener('click', (e) => {
+    const mapContainer = document.getElementById('cr-map-container');
+    const handleMapClick = (e) => {
         const zoneEl = e.target.closest('[data-zone]');
         if (zoneEl) {
             selectedZone = zoneEl.getAttribute('data-zone');
@@ -303,9 +291,10 @@ export function initControl() {
             refreshMap(d);
             refreshDispatch(d);
         }
-    });
+    };
+    mapContainer?.addEventListener('click', handleMapClick);
 
-    // ── Simulation Tick Helper (writes zones to Firebase) ──────
+    // ── Simulation Tick Helper ────────────────────────────
     const runTick = () => {
         const t = simulateTick();
         const timeEl = document.getElementById('cr-sim-time');
@@ -317,7 +306,6 @@ export function initControl() {
         refreshMetrics(d);
         if (selectedZone) refreshDispatch(d);
         updateScrubber(t);
-        // Write zone densities to Firebase /zones/{zoneId}
         Object.keys(d).forEach(zoneName => {
             const score = d[zoneName];
             const status = score > 0.80 ? 'critical' : score > 0.60 ? 'busy' : 'clear';
@@ -347,7 +335,17 @@ export function initControl() {
             simIntervalId = setInterval(runTick, 1000 / simSpeed);
         }
     });
+
+    // ── RETURN UNMOUNT ──
+    return () => {
+        console.log("Cleaning up Control Room dashboard...");
+        if (simIntervalId) clearInterval(simIntervalId);
+        unsubs.forEach(fn => fn && fn());
+        window.removeEventListener('popstate', handlePopState);
+        mapContainer?.removeEventListener('click', handleMapClick);
+    };
 }
+
 
 /* ─── Refresh Helpers ────────────────────────────────────────── */
 function refreshMap(densities) {

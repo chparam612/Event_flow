@@ -273,7 +273,9 @@ export function initDuring() {
     };
 
     // ── Firebase Realtime Listeners ─────────────────────────────
-    listenStaff((data) => {
+    const unsubs = [];
+
+    unsubs.push(listenStaff((data) => {
         if (!data) return;
         const densities = getZoneDensity();
         Object.keys(data).forEach(staffId => {
@@ -285,9 +287,9 @@ export function initDuring() {
         });
         updateStatusStrip(densities);
         syncMarkers(map, densities);
-    });
+    }));
 
-    listenZones((data) => {
+    unsubs.push(listenZones((data) => {
         if (!data) return;
         const densities = getZoneDensity();
         Object.keys(data).forEach(zKey => {
@@ -298,7 +300,7 @@ export function initDuring() {
         });
         updateStatusStrip(densities);
         syncMarkers(map, densities);
-    });
+    }));
 
     tick();
     const pollId = setInterval(tick, 30000);
@@ -313,15 +315,14 @@ export function initDuring() {
     });
     document.getElementById('exit-nav-btn')?.addEventListener('click', () => showNudge(buildExitNudgeHTML()));
 
-    // ── cleanup on SPA navigation ──────────────────────────────────
-    const observer = new MutationObserver((_, obs) => {
-        if (!document.body.contains(document.getElementById('during-screen'))) {
-            intervals.forEach(clearInterval);
-            obs.disconnect();
-        }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
     if (window.applyTranslations) window.applyTranslations();
+
+    // ── RETURN UNMOUNT ──
+    return () => {
+        console.log("Cleaning up During panel...");
+        intervals.forEach(clearInterval);
+        unsubs.forEach(fn => fn && fn());
+    };
 }
+
 

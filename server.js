@@ -51,17 +51,11 @@ const server = http.createServer((req, res) => {
         let contentType = MIME[ext] || 'application/octet-stream';
         let body = data;
 
-        // Inject Google Maps API Key if serving index.html
-        if (isSPA && ext === '.html') {
-            const key = process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
-            body = data.toString().replace(/{{GOOGLE_MAPS_API_KEY}}/g, key);
-            contentType = MIME['.html'];
-        }
-
         console.log(`${logTag} → 200 (${contentType})`);
         res.writeHead(200, { 'Content-Type': contentType });
         res.end(body);
     });
+
 });
 
 server.listen(PORT, () => {

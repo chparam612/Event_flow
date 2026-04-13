@@ -44,14 +44,16 @@ try {
 /**
  * Listen to a database path. Fires callback on every change (real-time).
  * Falls back to LocalStorage cross-tab events when Firebase is down.
+ * Returns an UNLISTEN/UNSUBSCRIBE function.
  */
 export function listen(path, callback) {
     const lsKey = 'ef_' + path.replace(/\//g, '_');
+    let fbUnsubscribe = null;
 
     // 1. Firebase listener
     if (db) {
         try {
-            onValue(ref(db, path), (snap) => {
+            fbUnsubscribe = onValue(ref(db, path), (snap) => {
                 const val = snap.val();
                 callback(val);
                 // Mirror to LocalStorage for cross-tab
@@ -65,18 +67,28 @@ export function listen(path, callback) {
     }
 
     // 2. LocalStorage cross-tab listener (fires in OTHER tabs)
-    window.addEventListener('storage', (e) => {
+    const storageHandler = (e) => {
         if (e.key === lsKey && e.newValue) {
             try { callback(JSON.parse(e.newValue)); } catch(err) {}
         }
-    });
+    };
+    window.addEventListener('storage', storageHandler);
 
     // 3. Initial load from LocalStorage (for instant display before Firebase connects)
     const cached = localStorage.getItem(lsKey);
     if (cached) {
         try { callback(JSON.parse(cached)); } catch(err) {}
     }
+
+    // Return Cleanup function
+    return () => {
+        console.log(`[Firebase] Unlistening from: ${path}`);
+        if (fbUnsubscribe) fbUnsubscribe(); // onValue returns its own off/unsubscribe in some versions, but standard is off()
+        // Wait, in Firebase 10.x, onValue returns an Unsubscribe function.
+        window.removeEventListener('storage', storageHandler);
+    };
 }
+
 
 /**
  * Write data to a specific path (overwrite).
@@ -170,7 +182,7 @@ export function writeZone(zoneId, density, status) {
     writeData('zones/' + zoneId, { density, status, updatedAt: Date.now() });
 }
 export function listenZones(callback) {
-    listen('zones', callback);
+    return listen('zones', callback);
 }
 
 // ── Staff ────────────────────────────────────────────────────
@@ -183,7 +195,7 @@ export function writeStaff(staffId, data) {
     });
 }
 export function listenStaff(callback) {
-    listen('staff', callback);
+    return listen('staff', callback);
 }
 
 // ── Instructions ─────────────────────────────────────────────
@@ -212,7 +224,7 @@ export function acknowledgeInstruction(instructionId, staffId) {
     } catch(e) {}
 }
 export function listenInstructions(callback) {
-    listen('instructions', callback);
+    return listen('instructions', callback);
 }
 
 // ── Nudges ───────────────────────────────────────────────────
@@ -220,7 +232,7 @@ export function pushNudge(targetZone, message) {
     return pushData('nudges', { targetZone, message, sentAt: Date.now() });
 }
 export function listenNudges(callback) {
-    listen('nudges', callback);
+    return listen('nudges', callback);
 }
 
 // ── Feedback ─────────────────────────────────────────────────
@@ -240,13 +252,13 @@ export function writeAttendee(sessionId, data) {
     });
 }
 export function listenAttendee(sessionId, callback) {
-    listen('attendees/' + sessionId, callback);
+    return listen('attendees/' + sessionId, callback);
 }
 
 /* ═══════════════════════════════════════════════════════════════
    LEGACY COMPAT  —  Keep old imports working during migration
    ═══════════════════════════════════════════════════════════════ */
-export function onSync(node, callback) { listen(node, callback); }
+export function onSync(node, callback) { return listen(node, callback); }
 export function pushSync(node, data) {
     if (node === 'instructions') {
         pushInstruction(data.zone || data.zoneId || '', data.text || data.message || '');
