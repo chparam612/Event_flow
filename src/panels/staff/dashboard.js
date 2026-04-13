@@ -203,12 +203,11 @@ export function initStaff() {
             }
 
             try {
-                const { auth } = await import('/src/firebase.js');
-                const { signOut, getAuth } = await import(
-                    'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js'
+                const { auth: fireAuth } = await import('/src/firebase.js');
+                const { signOut } = await import(
+                    'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
                 );
-                const fireAuth = getAuth();
-                await signOut(fireAuth);
+                if (fireAuth) await signOut(fireAuth);
             } catch(e) {
                 console.log('SignOut error (continuing):', e);
             } finally {
