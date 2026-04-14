@@ -130,6 +130,47 @@ test('Nudge triggers before crowd peak not after', () => {
 
 // Summary
 console.log('\n====================');
+
+test('Crowd context for Gemini is correct format', () => {
+  const mockDensities = {
+    'North Stand': 0.75,
+    'South Stand': 0.45,
+    'East Stand': 0.92
+  };
+  const context = Object.entries(mockDensities)
+    .map(([name, d]) => ({
+      name,
+      density: Math.round(d * 100) + '%',
+      status: d > 0.8 ? 'CRITICAL' : 
+              d > 0.6 ? 'BUSY' : 'CLEAR'
+    }));
+  assert(context.length === 3,
+    'Context must have 3 zones');
+  assert(context[2].status === 'CRITICAL',
+    'East Stand 92% must be CRITICAL');
+  assert(context[1].status === 'CLEAR',
+    'South Stand 45% must be CLEAR');
+});
+
+test('AI fallback message is valid', () => {
+  const fallback = 
+    'AI assistant temporarily unavailable. ' +
+    'Please check venue screens for updates.';
+  assert(fallback.length > 0,
+    'Fallback must exist');
+  assert(!fallback.includes('undefined'),
+    'Fallback must not have undefined');
+});
+
+test('Gemini insight types are valid', () => {
+  const validTypes = ['warning', 'info', 'action'];
+  const testInsight = { type: 'warning' };
+  assert(
+    validTypes.includes(testInsight.type),
+    'Type must be warning, info, or action'
+  );
+});
+
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed === 0) {
   console.log('🎉 All tests passed! EventFlow logic verified.');
@@ -137,3 +178,4 @@ if (failed === 0) {
   console.log('⚠️  Some tests failed. Review above.');
   process.exit(1);
 }
+

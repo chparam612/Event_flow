@@ -1,6 +1,7 @@
 import { getZoneDensity, ZONES } from '/src/simulation.js';
 import { initVenueMap, syncMarkers } from '/src/mapHelper.js';
 import { listenStaff, listenZones } from '/src/firebase.js';
+import { renderAIChat, initAIChat } from './aiChat.js';
 
 const STATUS_PILLS_DATA = [
     { label: 'Gate B',          zone: ZONES.GATE_AREA,       emoji: '🚪' },
@@ -109,7 +110,7 @@ export function renderDuring() {
             .hide-scrollbar::-webkit-scrollbar { display: none; }
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         </style>
-    </div>`;
+    </div>` + renderAIChat();
 }
 
 /* ─── Init ────────────────────────────────────────────────────── */
@@ -174,6 +175,8 @@ export function initDuring() {
     document.getElementById('during-plan-btn')?.addEventListener('click', () => window.navigate('/plan'));
     document.getElementById('btn-food')?.addEventListener('click', () => showNudge(buildNudgeHTML("Food & Drink", "The N2 Counter has a 2-min queue right now.", "🍺", "CLEAR", "var(--primary-color)")));
     document.getElementById('btn-exit-plan')?.addEventListener('click', () => showNudge(buildNudgeHTML("Match Ending", "Your quickest exit is via Gate 7. Ready?", "🚪", "RECOMMENDED", "var(--primary-color)")));
+
+    initAIChat();
 
     return () => {
         clearInterval(pollId);

@@ -10,6 +10,7 @@ import {
     pushData
 } from '/src/firebase.js';
 import { logout } from '/src/auth.js';
+import { getControlInsights } from '/src/gemini.js';
 
 /* ─── Constants ──────────────────────────────────────────────── */
 const STAFF_ROSTER = [
@@ -196,6 +197,11 @@ export function renderControl() {
                 <div id="cr-dispatch-panel">
                     <div class="cr-no-alerts">Select a zone on the map to issue instructions</div>
                 </div>
+
+                <div class="cr-panel-title" style="margin-top:20px;">🤖 AI Insights</div>
+                <div id="cr-ai-insights" style="display:flex;flex-direction:column;gap:8px;min-height:80px;">
+                    <div style="color:#555;font-size:0.78rem;text-align:center;padding:20px;">Analyzing crowd data...</div>
+                </div>
             </aside>
             
         </main>
@@ -313,6 +319,33 @@ export function initControl() {
         });
     };
 
+    async function refreshAIInsights() {
+      const el = document.getElementById('cr-ai-insights');
+      if (!el) return;
+      
+      const d = getZoneDensity();
+      const result = await getControlInsights(d);
+      
+      if (!result.insights || result.insights.length === 0) {
+        el.innerHTML = '<div style="color:#555;font-size:0.78rem;text-align:center;padding:12px;">No insights available</div>';
+        return;
+      }
+      
+      el.innerHTML = result.insights.map(ins => {
+        const isWarn = ins.type === 'warning';
+        const col = isWarn ? '#ff4d4d' : ins.type === 'action' ? '#ffd166' : '#00C49A';
+        const rgba = isWarn ? '255,77,77' : '0,196,154';
+        return '<div style="background:rgba(' + rgba + ',0.08);border:1px solid rgba(' + rgba + ',0.2);border-radius:10px;padding:10px 12px;margin-bottom:6px;">' +
+          '<div style="color:' + col + ';font-size:0.75rem;font-weight:700;margin-bottom:3px;">' + ins.zone + '</div>' +
+          '<div style="color:#ccc;font-size:0.78rem;line-height:1.4;">' + ins.message + '</div>' +
+          '<div style="color:#555;font-size:0.72rem;margin-top:3px;">→ ' + ins.recommendation + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    refreshAIInsights();
+    const aiIntervalId = setInterval(refreshAIInsights, 120000);
+
     // Controls
     document.getElementById('sim-play')?.addEventListener('click', () => {
         if (simRunning) return;
@@ -338,6 +371,7 @@ export function initControl() {
 
     return () => {
         if (simIntervalId) clearInterval(simIntervalId);
+        if (typeof aiIntervalId !== 'undefined') clearInterval(aiIntervalId);
         unsubs.forEach(fn => fn && fn());
         // No need to removeEventListeners for popstate manually if we're replacing the whole page
         // but normally we would if it stayed. Here we'll just leave it since the user's snippet 
