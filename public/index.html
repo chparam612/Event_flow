@@ -22,6 +22,13 @@
     <script type="module" src="/src/i18nHelper.js"></script>
 
     <!-- Google Maps JS API -->
+    <script>
+      window.initMap = function() {
+        console.log('Google Maps API ready — NMS Ahmedabad loaded.');
+        // Notify mapHelper and any other listeners that Maps is fully loaded
+        window.dispatchEvent(new CustomEvent('google-maps-ready'));
+      };
+    </script>
     <script 
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAB-rkKZiGCOsnWR0gXhMyCOvau0iMYovs&libraries=places&callback=initMap" 
       async 

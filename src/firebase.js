@@ -37,6 +37,12 @@ try {
     console.warn("Firebase init failed — LocalSync fallback active.", error.message);
 }
 
+/* ─── Recursion Guard ────────────────────────────────────────── */
+// Prevents Firebase onValue → write → onValue infinite loop
+let _isWriting = false;
+// Prevents localStorage mirror from re-triggering storage events
+let _isMirroring = false;
+
 /* ═══════════════════════════════════════════════════════════════
    CORE SYNC API  —  Dual-mode: Firebase + LocalStorage
    ═══════════════════════════════════════════════════════════════ */
@@ -55,9 +61,12 @@ export function listen(path, callback) {
         try {
             fbUnsubscribe = onValue(ref(db, path), (snap) => {
                 const val = snap.val();
-                callback(val);
-                // Mirror to LocalStorage for cross-tab
+                // Mirror to LocalStorage for cross-tab BEFORE calling callback
+                // Use _isMirroring flag so storage event handler ignores this write
+                _isMirroring = true;
                 try { localStorage.setItem(lsKey, JSON.stringify(val)); } catch(e) {}
+                _isMirroring = false;
+                callback(val);
             }, (err) => {
                 console.warn('Firebase listen error on ' + path + ':', err.message);
             });
@@ -66,8 +75,10 @@ export function listen(path, callback) {
         }
     }
 
-    // 2. LocalStorage cross-tab listener (fires in OTHER tabs)
+    // 2. LocalStorage cross-tab listener (fires in OTHER tabs only)
+    // _isMirroring guard ensures our own mirroring doesn't re-trigger this
     const storageHandler = (e) => {
+        if (_isMirroring) return; // skip our own mirror writes
         if (e.key === lsKey && e.newValue) {
             try { callback(JSON.parse(e.newValue)); } catch(err) {}
         }
@@ -92,85 +103,96 @@ export function listen(path, callback) {
 
 /**
  * Write data to a specific path (overwrite).
+ * Guard: prevents re-entrant writes from Firebase onValue callbacks.
  */
 export function writeData(path, data) {
-    const lsKey = 'ef_' + path.replace(/\//g, '_');
-    const payload = { ...data, updatedAt: Date.now() };
-
-    // LocalStorage (immediate, cross-tab)
+    if (_isWriting) return; // prevent recursion from onValue callbacks
+    _isWriting = true;
     try {
-        localStorage.setItem(lsKey, JSON.stringify(payload));
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: lsKey, newValue: JSON.stringify(payload), url: location.href
-        }));
-    } catch(e) {}
+        const lsKey = 'ef_' + path.replace(/\//g, '_');
+        const payload = { ...data, updatedAt: Date.now() };
 
-    // Firebase
-    if (db) {
-        try { set(ref(db, path), payload); } catch(e) {
-            console.warn('Firebase write failed:', path, e.message);
+        // LocalStorage (immediate, cross-tab via native 'storage' event)
+        try {
+            localStorage.setItem(lsKey, JSON.stringify(payload));
+        } catch(e) {}
+
+        // Firebase
+        if (db) {
+            try { set(ref(db, path), payload); } catch(e) {
+                console.warn('Firebase write failed:', path, e.message);
+            }
         }
+    } finally {
+        _isWriting = false;
     }
 }
 
 /**
  * Push a new child to a list path (auto-generated key).
+ * Guard: prevents re-entrant pushes from Firebase onValue callbacks.
  * Returns the generated key.
  */
 export function pushData(path, data) {
-    const payload = { ...data, sentAt: Date.now() };
+    if (_isWriting) return 'local_blocked_' + Date.now(); // prevent recursion
+    _isWriting = true;
     let generatedKey = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-
-    // Firebase push (gets real key)
-    if (db) {
-        try {
-            const newRef = push(ref(db, path));
-            generatedKey = newRef.key;
-            set(newRef, payload);
-        } catch(e) {
-            console.warn('Firebase push failed:', path, e.message);
-        }
-    }
-
-    // LocalStorage (merge into list)
-    const lsKey = 'ef_' + path.replace(/\//g, '_');
     try {
-        const existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
-        existing[generatedKey] = payload;
-        // Trim to last 50 entries
-        const keys = Object.keys(existing);
-        if (keys.length > 50) {
-            keys.slice(0, keys.length - 50).forEach(k => delete existing[k]);
-        }
-        localStorage.setItem(lsKey, JSON.stringify(existing));
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: lsKey, newValue: JSON.stringify(existing), url: location.href
-        }));
-    } catch(e) {}
+        const payload = { ...data, sentAt: Date.now() };
 
+        // Firebase push (gets real key)
+        if (db) {
+            try {
+                const newRef = push(ref(db, path));
+                generatedKey = newRef.key;
+                set(newRef, payload);
+            } catch(e) {
+                console.warn('Firebase push failed:', path, e.message);
+            }
+        }
+
+        // LocalStorage (merge into list)
+        const lsKey = 'ef_' + path.replace(/\//g, '_');
+        try {
+            const existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
+            existing[generatedKey] = payload;
+            // Trim to last 50 entries
+            const keys = Object.keys(existing);
+            if (keys.length > 50) {
+                keys.slice(0, keys.length - 50).forEach(k => delete existing[k]);
+            }
+            localStorage.setItem(lsKey, JSON.stringify(existing));
+        } catch(e) {}
+    } finally {
+        _isWriting = false;
+    }
     return generatedKey;
 }
 
 /**
  * Update specific fields at a path (merge, not overwrite).
+ * Guard: prevents re-entrant updates from Firebase onValue callbacks.
  */
 export function updateData(path, fields) {
-    const lsKey = 'ef_' + path.replace(/\//g, '_');
-
-    // Firebase
-    if (db) {
-        try { update(ref(db, path), fields); } catch(e) {}
-    }
-
-    // LocalStorage merge
+    if (_isWriting) return; // prevent recursion
+    _isWriting = true;
     try {
-        const existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
-        Object.assign(existing, fields);
-        localStorage.setItem(lsKey, JSON.stringify(existing));
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: lsKey, newValue: JSON.stringify(existing), url: location.href
-        }));
-    } catch(e) {}
+        const lsKey = 'ef_' + path.replace(/\//g, '_');
+
+        // Firebase
+        if (db) {
+            try { update(ref(db, path), fields); } catch(e) {}
+        }
+
+        // LocalStorage merge
+        try {
+            const existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
+            Object.assign(existing, fields);
+            localStorage.setItem(lsKey, JSON.stringify(existing));
+        } catch(e) {}
+    } finally {
+        _isWriting = false;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -217,9 +239,6 @@ export function acknowledgeInstruction(instructionId, staffId) {
             if (!existing[instructionId].acknowledgedBy) existing[instructionId].acknowledgedBy = {};
             existing[instructionId].acknowledgedBy[staffId] = Date.now();
             localStorage.setItem(lsKey, JSON.stringify(existing));
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: lsKey, newValue: JSON.stringify(existing), url: location.href
-            }));
         }
     } catch(e) {}
 }

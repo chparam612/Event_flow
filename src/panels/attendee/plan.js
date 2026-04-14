@@ -1,6 +1,7 @@
 import { getZoneDensity, ZONES } from '/src/simulation.js';
 import { initVenueMap, syncMarkers } from '/src/mapHelper.js';
 import { listenStaff, listenZones } from '/src/firebase.js';
+import { renderAIChat, initAIChat } from './aiChat.js';
 
 export function renderPlan() {
     return `
@@ -87,8 +88,7 @@ export function renderPlan() {
                 .nav-item { flex:1; text-align:center; text-decoration:none; font-size:1.2rem; color:#fff; }
                 @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
             </style>
-        </div>
-    `;
+        </div>` + renderAIChat();
 }
 
 export function initPlan() {
@@ -132,6 +132,8 @@ export function initPlan() {
             window.navigate('/escort');
         };
     }
+
+    initAIChat();
 
     return () => {
         clearInterval(pollId);
