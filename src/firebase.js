@@ -38,9 +38,10 @@ try {
 }
 
 /* ─── Recursion Guard ────────────────────────────────────────── */
-// Prevents Firebase onValue → write → onValue infinite loop
-let _isWriting = false;
-// Prevents localStorage mirror from re-triggering storage events
+// Per-function Set prevents re-entrant Firebase onValue → write → onValue loops
+// Using a Set (not a boolean) so different functions don't block each other
+const _writing = new Set();
+// Prevents localStorage mirror inside onValue from re-triggering storageHandler
 let _isMirroring = false;
 
 /* ═══════════════════════════════════════════════════════════════
@@ -106,8 +107,8 @@ export function listen(path, callback) {
  * Guard: prevents re-entrant writes from Firebase onValue callbacks.
  */
 export function writeData(path, data) {
-    if (_isWriting) return; // prevent recursion from onValue callbacks
-    _isWriting = true;
+    if (_writing.has('writeData')) return; // prevent recursion from onValue callbacks
+    _writing.add('writeData');
     try {
         const lsKey = 'ef_' + path.replace(/\//g, '_');
         const payload = { ...data, updatedAt: Date.now() };
@@ -124,7 +125,7 @@ export function writeData(path, data) {
             }
         }
     } finally {
-        _isWriting = false;
+        _writing.delete('writeData');
     }
 }
 
@@ -134,8 +135,8 @@ export function writeData(path, data) {
  * Returns the generated key.
  */
 export function pushData(path, data) {
-    if (_isWriting) return 'local_blocked_' + Date.now(); // prevent recursion
-    _isWriting = true;
+    if (_writing.has('pushData')) return 'local_blocked_' + Date.now(); // prevent recursion
+    _writing.add('pushData');
     let generatedKey = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     try {
         const payload = { ...data, sentAt: Date.now() };
@@ -164,7 +165,7 @@ export function pushData(path, data) {
             localStorage.setItem(lsKey, JSON.stringify(existing));
         } catch(e) {}
     } finally {
-        _isWriting = false;
+        _writing.delete('pushData');
     }
     return generatedKey;
 }
@@ -174,8 +175,8 @@ export function pushData(path, data) {
  * Guard: prevents re-entrant updates from Firebase onValue callbacks.
  */
 export function updateData(path, fields) {
-    if (_isWriting) return; // prevent recursion
-    _isWriting = true;
+    if (_writing.has('updateData')) return; // prevent recursion
+    _writing.add('updateData');
     try {
         const lsKey = 'ef_' + path.replace(/\//g, '_');
 
@@ -191,7 +192,7 @@ export function updateData(path, fields) {
             localStorage.setItem(lsKey, JSON.stringify(existing));
         } catch(e) {}
     } finally {
-        _isWriting = false;
+        _writing.delete('updateData');
     }
 }
 

@@ -1,4 +1,4 @@
-import { syncSimulation } from '/src/firebase.js';
+// simulation.js — pure local crowd simulation, no Firebase writes
 
 const TOTAL_ATTENDEES = 500;
 
@@ -195,27 +195,16 @@ export function simulateTick() {
 
 /**
  * 2. Get Zone Density
+ * Pure local read — returns current in-memory zone densities.
  * Example return: { "North Stand": 0.85, ... }
+ * NOTE: Does NOT write to Firebase. Call syncSimulation() separately
+ * from a throttled timer only (e.g. dashboard), never from a render loop.
  */
 export function getZoneDensity() {
     let result = {};
     Object.keys(zonesState).forEach(zone => {
-        // Density returned as a score from 0.0 to 1.X
         result[zone] = parseFloat(zonesState[zone].density.toFixed(2));
     });
-
-    const currentTime = formatTimeFromMinutes(simulationTimeMinutes);
-    
-    // Push to Firebase for real-time visualization across boards
-    try {
-        syncSimulation({
-            zones: result,
-            time: currentTime
-        });
-    } catch(e) { 
-        // Silently fail if firebase is blocked or config missing
-    }
-
     return result;
 }
 

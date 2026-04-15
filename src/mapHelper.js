@@ -17,6 +17,9 @@ const getDensityColor = (score) => {
     return               DENSITY_COLORS.GREEN;
 };
 
+// Cache markers per map instance to avoid creating duplicates on every tick
+const _markerCache = new WeakMap(); // map object -> { zoneName -> Marker }
+
 /**
  * MockMap Class 
  * Mimics a Google Map object to provide a unified API when Google Maps fails.
@@ -154,12 +157,13 @@ export function initVenueMap(elementId, options = {}) {
     }
     
     // Fallback to MockMap if GMap fails or placeholder key detected
-    const densities = typeof getZoneDensity === 'function' ? getZoneDensity() : {};
-    return new MockMap(elementId, densities);
+    return new MockMap(elementId, {});
 }
 
 /**
  * Sync markers for either GMap or MockMap.
+ * GMap: caches Marker instances in a WeakMap — only updates icon color, never creates duplicates.
+ * MockMap: calls mock.sync() which re-renders the SVG.
  */
 export function syncMarkers(map, densities) {
     if (!map) return;
@@ -169,34 +173,52 @@ export function syncMarkers(map, densities) {
         return;
     }
 
-    // Google Maps Marker Sync (if map exists)
-    if (typeof google === 'undefined') return;
+    // Google Maps Marker Sync
+    if (typeof google === 'undefined' || !google.maps) return;
 
-    const zones = [
-        { name: 'North Stand', pos: { lat: 23.0935, lng: 72.5975 }, density: densities['North Stand'] || 0.3 },
-        { name: 'South Stand', pos: { lat: 23.0903, lng: 72.5975 }, density: densities['South Stand'] || 0.3 },
-        { name: 'East Stand',  pos: { lat: 23.0919, lng: 72.5995 }, density: densities['East Stand'] || 0.3 },
-        { name: 'West Stand',  pos: { lat: 23.0919, lng: 72.5955 }, density: densities['West Stand'] || 0.3 },
-        { name: 'Gate Area',   pos: { lat: 23.0910, lng: 72.5940 }, density: densities['Gate Area'] || 0.4 },
-        { name: 'Parking Zone', pos: { lat: 23.0880, lng: 72.5975 }, density: densities['Parking Zone'] || 0.2 },
+    const ZONE_POSITIONS = [
+        { name: 'North Stand',  pos: { lat: 23.0935, lng: 72.5975 } },
+        { name: 'South Stand',  pos: { lat: 23.0903, lng: 72.5975 } },
+        { name: 'East Stand',   pos: { lat: 23.0919, lng: 72.5995 } },
+        { name: 'West Stand',   pos: { lat: 23.0919, lng: 72.5955 } },
+        { name: 'Gate Area',    pos: { lat: 23.0910, lng: 72.5940 } },
+        { name: 'Parking Zone', pos: { lat: 23.0880, lng: 72.5975 } },
     ];
 
-    zones.forEach(z => {
-        const color = getDensityColor(z.density);
-        const marker = new google.maps.Marker({
-            position: z.pos,
-            map: map,
-            title: z.name,
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: color,
-                fillOpacity: 0.9,
-                strokeWeight: 2,
-                strokeColor: '#fff',
-                scale: 10
-            }
-        });
-        const info = new google.maps.InfoWindow({ content: `<div style="color:#000;">${z.name}: ${Math.round(z.density*100)}%</div>` });
-        marker.addListener('click', () => info.open(map, marker));
+    // Get or create the marker cache for this map
+    if (!_markerCache.has(map)) {
+        _markerCache.set(map, {});
+    }
+    const markers = _markerCache.get(map);
+
+    ZONE_POSITIONS.forEach(z => {
+        const density = densities[z.name] || 0.3;
+        const color = getDensityColor(density);
+        const iconConfig = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: color,
+            fillOpacity: 0.9,
+            strokeWeight: 2,
+            strokeColor: '#fff',
+            scale: 10
+        };
+
+        if (markers[z.name]) {
+            // Update existing marker icon only — no new object created
+            markers[z.name].setIcon(iconConfig);
+        } else {
+            // First time: create marker and cache it
+            const marker = new google.maps.Marker({
+                position: z.pos,
+                map: map,
+                title: z.name,
+                icon: iconConfig
+            });
+            const info = new google.maps.InfoWindow({
+                content: `<div style="color:#000;font-weight:700">${z.name}: ${Math.round(density * 100)}%</div>`
+            });
+            marker.addListener('click', () => info.open(map, marker));
+            markers[z.name] = marker;
+        }
     });
 }
